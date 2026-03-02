@@ -151,9 +151,9 @@ code: |
 id: trial court county
 continue button field: case_county
 question: |
-  In which county was this case filed?
+  In which county was the Circuit Court case filed?
 subquestion: |
-  If this is for a new case, select the county where it will be filed.
+  This is the county is where the trial court issued the order that is being appealed.
 fields:
   - County: trial_court_index
     code: |
@@ -1858,42 +1858,33 @@ content: |
   [Illinois Legal Aid Online](https://www.illinoislegalaid.org)
 ---
 objects:
-  - IL_fee_waiver_Post_interview_instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", has_addendum=False)
-  - IL_fee_waiver_attachment: ALDocument.using(title="Fee waiver application", filename="Fee waiver application.pdf", has_addendum=False)
-  - IL_fee_waiver_supplement: ALDocument.using(title="Winnebago supplement", filename="Winnebago supplement.pdf", has_addendum=False)
-  - kankakee_supplement: ALDocument.using(title="Kankakee supplement", filename="Kankakee supplement.pdf", has_addendum=False, enabled=False)
-  - IL_fee_waiver_order: ALDocument.using(title="Fee waiver order", filename="Fee waiver order.pdf", has_addendum=False)
+  - instructions: ALDocument.using(title="Instructions", filename="instructions.pdf", has_addendum=False)
+  - application: ALDocument.using(title="Fee waiver application", filename="application.pdf", has_addendum=False)
+  - order: ALDocument.using(title="Order", filename="order.pdf", has_addendum=False)
 ---
 code: |
-  IL_fee_waiver_Post_interview_instructions.enabled = True
-  IL_fee_waiver_attachment.enabled = True
-  IL_fee_waiver_supplement.enabled = False
-  kankakee_supplement.enabled = False
-  IL_fee_waiver_order.enabled = True
-
-  if trial_court.address.county == "Winnebago":
-    IL_fee_waiver_supplement.enabled = True
-
-# kankakee supplement removed sep 2024. Code & template retained for backwards compatibility
+  instructions.enabled = True
+  application.enabled = True
+  order.enabled = True
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[IL_fee_waiver_Post_interview_instructions, IL_fee_waiver_attachment, IL_fee_waiver_supplement, kankakee_supplement, IL_fee_waiver_order], filename="IL_fee_waiver_package.pdf", title="All forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[IL_fee_waiver_attachment, IL_fee_waiver_supplement, kankakee_supplement, IL_fee_waiver_order], filename="IL_fee_waiver_package.pdf", title="Download all forms")
+  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, application, order], filename="appellate_fee_waiver_package.pdf", title="All forms")
+  - al_court_bundle: ALDocumentBundle.using(elements=[application, order], filename="appellate_fee_waiver_package.pdf", title="All forms")
 ---
 attachments:
-  - name: Post interview instructions
-    filename: Fee-waiver-instructions     
-    variable name: IL_fee_waiver_Post_interview_instructions[i]        
-    pdf template file: il_fee_waiver_instructions.pdf
+  - name: instructions
+    filename: instructions     
+    variable name: instructions[i]        
+    pdf template file: instructions.pdf
     editable: False
     fields:
         - "fake": ${ "" }
         
-  - name: IL fee waiver order   
-    filename: IL_fee_waiver_order
-    variable name: IL_fee_waiver_order[i]
+  - name: order   
+    filename: order
+    variable name: order[i]
     skip undefined: True
-    pdf template file: FW-CIV-Order.pdf
+    pdf template file: order.pdf
     editable: False
     fields:
       - "trial_court_county": ${ trial_court.address.county }
@@ -1922,77 +1913,11 @@ attachments:
       - "docket_number__2": ${ docket_number }
       - "user_name_full": ${ users[0].name_full() }
 
-  - name: IL fee waiver supplement
-    filename: winnebago_supplement     
-    variable name: IL_fee_waiver_supplement[i]        
+  - name: application
+    filename: application     
+    variable name: application[i]        
     skip undefined: True
-    pdf template file: winnebago_supplement.pdf
-    editable: False
-    fields:
-      - "in_re": ${ "In re:" if in_re_check == True else ""} ${ in_re_label if in_re_check == True else ""}
-      - "plaintiff": ${ plaintiffs.full_names() }
-      - "defendant": ${ defendants.full_names() }
-      - "docket_number": ${ docket_number }
-      - "signer_name_full": |
-          % if filing_basis != "filing_self":
-          ${ signer[0].name_full() }
-          % else:
-          ${ users[0].name_full() }
-          % endif
-      - "signer_phone_number": |
-          % if filing_basis != "filing_self":
-          ${ phone_number_formatted(signer[0].phone_numbers()) }
-          % else:
-          ${ phone_number_formatted(users[0].phone_numbers()) }
-          % endif
-      - "signer_signature_slash_s": |
-          % if filing_basis != "filing_self":          
-          ${ "/s/ " + signer[0].name_full() if e_signature else '' }
-          % else:
-          ${ "/s/ " + users[0].name_full() if e_signature else ''  }
-          % endif
-
-  - name: Kankakee supplement
-    filename: kankakee_supplement     
-    variable name: kankakee_supplement[i]        
-    skip undefined: True
-    pdf template file: kankakee_supplement.pdf
-    editable: False
-    fields:
-      - "plaintiff": |
-          % if in_re_check:
-          ${ "In re: " + in_re_label }
-          % else:
-          % if plaintiffs.number() > 1:
-          ${ plaintiffs[0].name_full() }, et al.
-          % else:
-          ${ plaintiffs[0].name_full() }
-          % endif
-          % endif
-      - "defendant": |
-          % if in_re_check:
-          ${ "" }
-          % else:
-          % if defendants.number() > 1:
-          ${ defendants[0].name_full() }, et al.
-          % else:
-          ${ defendants[0].name_full() }      
-          % endif
-          % endif
-      - "docket_number": ${ docket_number }
-      - "signer_signature_slash_s": |
-          % if filing_basis != "filing_self":          
-          ${ "/s/ " + signer[0].name_full() if e_signature else '' }
-          % else:
-          ${ "/s/ " + users[0].name_full() if e_signature else ''  }
-          % endif
-      - "date": ${ today() if e_signature else '' }
-
-  - name: IL fee waiver petition
-    filename: IL_fee_waiver     
-    variable name: IL_fee_waiver_attachment[i]        
-    skip undefined: True
-    pdf template file: FeeWaiver_Civil_Application.pdf
+    pdf template file: application.pdf
     editable: False
     fields:
       - "trial_court_county": ${ trial_court.address.county }
