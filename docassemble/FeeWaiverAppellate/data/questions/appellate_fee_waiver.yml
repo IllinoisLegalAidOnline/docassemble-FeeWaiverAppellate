@@ -51,14 +51,14 @@ code: |
   whats_next
   set_progress(10)
   appellate_fee_waiver
-  filing_basis
+  filing_basis = "filing_self"
 
   nav.set_section('section_income')
-  user_has_dependents
-  if user_receives_benefits:
-    if trial_court_index != "-1":
+  if not user_is_incarcerated:
+    user_has_dependents
+    if user_receives_benefits:
       user_qualifies_interstitial
-  if not user_receives_benefits or trial_court_index == "-1":
+  if user_is_incarcerated or not user_receives_benefits:
     user_applied_for_benefits
     set_progress(25)
     if not user_income_none:
@@ -104,14 +104,10 @@ code: |
   nav.set_section('section_about_you')
   substantial_hardship_explanation
   users[0].address.address
-  if filing_basis == "filing_self":
-    users[0].has_email_address
-  if filing_basis != "filing_self":
-    signer[0].has_email_address
+  users[0].has_email_address
 
   set_progress(90)
   e_signature
-  court_choice
   bring_docs
 
   set_progress(100)
@@ -214,12 +210,10 @@ subquestion: |
   * Your monthly expenses, and
   * The value of your belongings.
 
-  If you are filling out this form on behalf of a minor or incompetent adult, you will need that person's information.
-
-  **Note:** You will also need to know:
+  You will also need to know information about the:
   
-  * Information about the Circuit Court case, including case number, county, and judge, and
-  * Information about the Appellate Court case for which you are requesting a fee waiver.
+  * Circuit Court case, including case number, county, and judge, and
+  * Appellate Court case for which you are requesting a fee waiver.
 
   You can find this information on other court papers you have about this case.
   
@@ -267,6 +261,28 @@ subquestion: |
   * Your case is a criminal, traffic, or juvenile justice case. If you need to ask for a fee waiver in a criminal case, use the [**Criminal Court fee waiver Easy Form**](https://www.illinoislegalaid.org/node/154466).
   * Your case is in the Illinois Supreme Court. If you need to ask for a fee waiver in a Supreme Court case, use the [**Fee waiver - Supreme Court of Illinois Easy Form**](https://www.illinoislegalaid.org/node/158696).
 ---
+id: is user incarcerated
+question: |
+  Are you currently incarcerated?
+subquestion: |
+  If you are currently incarcerated, the fee waiver application asks for different information.
+fields:
+  - no label: user_is_incarcerated
+    datatype: yesnoradio
+  - What is your Inmate ID?: inmate_id
+    maxlength: 30
+    show if:
+      variable: user_is_incarcerated
+      is: True
+  - What is the current balance of your trust account?: trust_account_balance
+    datatype: currency
+    min: 0
+    show if:
+      variable: user_is_incarcerated
+      is: True
+      
+
+---
 id: Do you receive any benefits
 question: |
   % if filing_basis == "filing_self":
@@ -294,9 +310,9 @@ fields:
 id: Did you apply for any benefits
 question: |
   % if filing_basis == "filing_self":
-  Have you applied and are waiting to learn if you receive any public benefits?
+  Have you applied for and are waiting to learn if you receive any public benefits?
   % else:
-  Has ${ users[0].familiar() } applied and is waiting to learn if
+  Has ${ users[0].familiar() } applied for and is waiting to learn if
   they receive any public benefits?
   % endif 
 subquestion: |
@@ -377,7 +393,7 @@ fields:
 ---
 template: user_role_help
 subject: |
-  **What if I'm not sure?**
+  **How to determine your role in the case**
 content: |  
   % if filing_basis == "filing_self":
   If you are the first person to file a form in the case, you started the case. You are the **Plaintiff** or the **Petitioner.**
@@ -514,7 +530,7 @@ id: any other monthly income
 question: |
   Any other income in the past month?
 subquestion: |
-  The forms have space for **{certain types of income}** and up to 3 other sources of income.
+  The forms have space for **{certain types of income}** and up to 2 other sources of income.
 
   So far you have told us about:
   
@@ -560,13 +576,12 @@ code: |
   user_income_other_list[i].complete = True
 ---
 code: |
-  if user_income_other_list.number_gathered() >= 3:
+  if user_income_other_list.number_gathered() >= 2:
     user_income_other_list.there_is_another = False
 ---
 depends on:
   - user_income_other_list[0].amount
   - user_income_other_list[1].amount
-  - user_income_other_list[2].amount
   - user_income_household_amount
   - user_income_ss_amount
   - user_income_employment_amount
@@ -583,7 +598,6 @@ code: |
   
   user_income_total = sum_if_defined('user_income_other_list[0].amount', 
       'user_income_other_list[1].amount',
-      'user_income_other_list[2].amount',
       'user_income_household_amount',
       'user_income_ss_amount',
       'user_income_employment_amount',
@@ -718,7 +732,7 @@ id: any other income last year
 question: |
   Any other income in the past 12 months?
 subquestion: |
-  The forms have space for **{certain types of income}** and up to 3 other sources of income.
+  The forms have space for **{certain types of income}** and up to 2 other sources of income.
 
   So far you have told us about:
   
@@ -753,13 +767,12 @@ code: |
   user_annual_other_list[i].complete = True
 ---
 code: |
-  if user_annual_other_list.number_gathered() >= 3:
+  if user_annual_other_list.number_gathered() >= 2:
     user_annual_other_list.there_is_another = False
 ---
 depends on:
   - user_annual_other_list[0].amount
   - user_annual_other_list[1].amount
-  - user_annual_other_list[2].amount
   - user_annual_household_amount
   - user_annual_ss_amount
   - user_annual_employment_amount
@@ -775,8 +788,7 @@ code: |
       'user_annual_ss_amount',
       'user_annual_unemployment_amount',
       'user_annual_other_list[0].amount',
-      'user_annual_other_list[1].amount',
-      'user_annual_other_list[2].amount'
+      'user_annual_other_list[1].amount'
   )
 ---
 id: What expenses do you have right now
@@ -905,7 +917,7 @@ id: any other expenses
 question: |
   Any other monthly expenses?
 subquestion: |
-  The forms have space for **{certain types of expenses}** and up to 3 other monthly expenses.
+  The forms have space for **{certain types of expenses}** and up to 2 other monthly expenses.
 
   So far you have told us about:
   
@@ -963,7 +975,7 @@ code: |
   user_expense_other_list[i].complete = True
 ---
 code: |
-  if user_expense_other_list.number_gathered() >= 3:
+  if user_expense_other_list.number_gathered() >= 2:
     user_expense_other_list.there_is_another = False
 ---
 depends on:
@@ -978,7 +990,6 @@ depends on:
   - user_expense_utilities_amount
   - user_expense_other_list[0].amount
   - user_expense_other_list[1].amount
-  - user_expense_other_list[2].amount
 code: |
   user_expense_total = sum_if_defined(
       'user_expense_car_amount',
@@ -991,8 +1002,7 @@ code: |
       'user_expense_rent_amount',
       'user_expense_utilities_amount',
       'user_expense_other_list[0].amount',
-      'user_expense_other_list[1].amount',
-      'user_expense_other_list[2].amount'
+      'user_expense_other_list[1].amount'
     )
 ---
 depends on: filing_basis
@@ -1105,7 +1115,7 @@ id: any other assets
 question: |
   Any other assets?
 subquestion: |
-  The forms have space for **{certain types of assets}** and up to 3 other assets.
+  The forms have space for **{certain types of assets}** and up to 2 other assets.
 
   So far you have told us about these assets:
   
@@ -1147,7 +1157,7 @@ code: |
   user_asset_other_list[i].complete = True
 ---
 code: |
-  if user_asset_other_list.number_gathered() >= 3:
+  if user_asset_other_list.number_gathered() >= 2:
     user_asset_other_list.there_is_another = False
 
 ---
@@ -1159,7 +1169,6 @@ depends on:
   - user_asset_vehicle2_amount
   - user_asset_other_list[0].amount
   - user_asset_other_list[1].amount
-  - user_asset_other_list[2].amount
 code: |
   user_asset_total = (sum_if_defined(
     'user_asset_bank_account_amount'
@@ -1168,14 +1177,13 @@ code: |
     'user_asset_vehicle1_amount',
     'user_asset_vehicle2_amount',
     'user_asset_other_list[0].amount',
-    'user_asset_other_list[1].amount',
-    'user_asset_other_list[2].amount' ) - sum_if_defined('user_asset_home_amount_owed') )
+    'user_asset_other_list[1].amount') - sum_if_defined('user_asset_home_amount_owed') )
 ---
 depends on:
   - user_income_total
   - user_annual_total
 code: |
-  if user_has_dependents:
+  if not user_is_incarcerated and user_has_dependents:
     household_size = 1 + user_dependents_adults + user_dependents_children
     last_month_income_qualifies = poverty_scale_income_qualifies(user_income_total, household_size=household_size, multiplier=1.25)
     last_year_income_qualifies = poverty_scale_income_qualifies(user_annual_total/12, household_size=household_size, multiplier=1.25)
@@ -1260,7 +1268,7 @@ content: |
   decide to provide.
   
   Some of ${ your_or_their } assets will not be counted. For example: the value of ${ your_or_their } car,
-  up to $2,400, is not counted. A person can have up to $4,000 in other assets,
+  up to $3,600, is not counted. A person can have up to $4,000 in other assets,
   such as bank accounts, that are not counted. The assets that are not
   counted are set by law: specifically, 
   [**735 ILCS 5/12-901**](https://www.ilga.gov/legislation/ilcs/fulltext.asp?DocName=073500050K12-1001)
@@ -1302,36 +1310,6 @@ fields:
     show if: 
       variable: filing_basis
       is: filing_on_behalf_of        
-#  - Attorney number (if any): signer_attorney_number      
-#    required: False
-#    help: |
-#      If you are an attorney licensed in Illinois, you can enter your number if filing on behalf of another person. Some jurisdictions like Cook or DuPage County require a firm or an individual attorney number.
-#    maxlength: 20    
-#    show if: 
-#      variable: filing_basis
-#      is: filing_on_behalf_of
-  #- How are you related to the person you are filing for?: relationship_to_minor
-  #  maxlength: 33
-  #  show if: 
-  #    variable: filing_basis
-  #    is: filing_on_behalf_of
----
-id: birth year
-question: |
-  % if filing_basis == "filing_self":
-  What year were you born?
-  % else:
-  What year was ${ users[0].familiar() } born?
-  % endif
-fields:
-  - Year of birth: users[0].birth_year
-    input type: combobox
-    datatype: integer
-    maxlength: 4
-    min: ${ today().year-120 }
-    max: ${ today().year }
-    code: |
-      reversed(range(today().year-120, today().year+1))
 ---
 id: your contact information
 generic object: ALIndividual
@@ -1581,7 +1559,7 @@ fields:
 ---
 id: circuit court case number
 question: |
-  Do you know ${ your_or_obo_possessive } case number?
+  What is ${ your_or_obo_possessive } Circuit Court case number?
 subquestion: |
   The case number will be listed on ${ your_or_obo_possessive } court papers. The Circuit Clerk gives each case a number when it is filed.
   
@@ -1682,7 +1660,7 @@ subquestion: |
   If someone on the other side of the case is asking the Appellate Court to review, select **Them**.
 fields:
   - Who is filing the appeal?: user_is_appellant
-    datatype: yesnoradio
+    datatype: radio
     choices:
       - Us: True
       - Them: False
@@ -1767,22 +1745,6 @@ under: |
     ${ signer[0].name_full() }
   % endif
 ---
-id: court choice
-question: |
-  If the judge has questions about the Fee waiver application, how do you want to attend court?
-subquestion: |
-  You might already have a court date scheduled in your case.
-  
-  Some courts may schedule a separate court date to ask for more information about your Fee waiver application. You might not get your choice, but you can say if you want to attend court for the fee waiver remotely or in person. 
-
-  The Circuit Clerk should give you details about how to attend court. 
-fields:
-  - no label: court_choice
-    datatype: radio
-    choices:
-      - I want a remote court date (video or telephone).: remote
-      - I want an in-person court date.: person
----
 id: bring documents
 continue button field: bring_docs
 question: |
@@ -1807,10 +1769,6 @@ question: |
 subquestion: |
   After you click **Next**, it may take a few moments to finish making your forms.
 
-  % if trial_court_index == "-1":
-  **Note:** Cook County judges look at Public Benefits and other sections of the Application. It is normal for all sections to be filled in.
-  
-  % endif
   ###### You do not need to refresh your screen. Hang in there!
   
   [NEWLINE]
@@ -1849,7 +1807,7 @@ under: |
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
-  Fee waiver forms
+  Fee waiver - Appellate Court forms
 content: |
   Your forms are attached.
   
@@ -2263,13 +2221,7 @@ attachments:
           % endif
       - "user_asset_none": ${ user_asset_none }
       - "substantial_hardship_explanation": ${ substantial_hardship_explanation }
-      - "court_date_remote_cb": ${ True if court_choice == 'remote' else '' }
-      - "court_date_in_person_cb": ${ True if court_choice == 'person' else '' }
       - "form_for_self": ${ True }
-      #- "relationship_to_minor": |
-      #    % if filing_basis != "filing_self":
-      #    ${ relationship_to_minor  }
-      #    % endif
 ---
 id: IL fee waiver review screen
 event: review_answers
@@ -2721,16 +2673,6 @@ review:
     button: |
       **Do you want to add your e-signature to your fee waiver?**
       ${ word(yesno(e_signature)) }
-  - Edit: court_choice
-    button: |
-      **If the judge has questions about your Fee waiver application, you want to attend court:**
-      
-      % if court_choice == 'remote':
-      * Remotely (by video or telephone)
-      % endif
-      % if court_choice == 'person':
-      * In person
-      % endif
 ---
 id: edit plaintiffs review screen
 continue button field: plaintiffs.revisit
@@ -2829,7 +2771,7 @@ question: |
 subquestion: |
   ${ user_income_other_list.table }
 
-  % if user_income_other_list.number_gathered() < 3:
+  % if user_income_other_list.number_gathered() < 2:
   ${ user_income_other_list.add_action() }
   % endif
 ---
@@ -2853,7 +2795,7 @@ question: |
 subquestion: |
   ${ user_annual_other_list.table }
 
-  % if user_annual_other_list.number_gathered() < 3:
+  % if user_annual_other_list.number_gathered() < 2:
   ${ user_annual_other_list.add_action() }
   % endif
 ---
@@ -2877,7 +2819,7 @@ question: |
 subquestion: |
   ${ user_expense_other_list.table }
 
-  % if user_expense_other_list.number_gathered() < 3:
+  % if user_expense_other_list.number_gathered() < 2:
   ${ user_expense_other_list.add_action() }
   % endif
 ---
@@ -2901,7 +2843,7 @@ question: |
 subquestion: |
   ${ user_asset_other_list.table }
 
-  % if user_asset_other_list.number_gathered() < 3:
+  % if user_asset_other_list.number_gathered() < 2:
   ${ user_asset_other_list.add_action() }
   % endif
 ---
@@ -3415,13 +3357,3 @@ review:
     button: |
       **Do you want to add your e-signature to your fee waiver?**
       ${ word(yesno(e_signature)) }
-  - Edit: court_choice
-    button: |
-      **If the judge has questions about your Fee waiver application, you want to attend court:**
-      
-      % if court_choice == 'remote':
-      * Remotely (by video or telephone)
-      % endif
-      % if court_choice == 'person':
-      * In person
-      % endif
