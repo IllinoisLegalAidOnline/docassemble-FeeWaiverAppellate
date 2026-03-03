@@ -23,8 +23,9 @@ code: |
   allowed_courts = ['Circuit']
 ---
 objects:
-  - signer: ALPeopleList.using(ask_number=True,target_number=1)
   - users: ALPeopleList 
+  - other_parties: ALPeopleList.using(there_are_any=True)
+  - judge: ALIndividual
   - user_income_other_list: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - user_annual_other_list: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - user_expense_other_list: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
@@ -37,7 +38,7 @@ sections:
   - section_expenses: Expenses
   - section_assets: Assets
   - section_case_info: Court case info
-  - section_about_you: Details about person asking for a fee waiver
+  - section_about_you: About you
   - section_download: Download
 ---
 mandatory: True
@@ -91,7 +92,7 @@ code: |
   plaintiffs
   defendants
   trial_court.address.address
-  trial_court_judge_name
+  judge.name.last
   minor_involvement
   juvenile_act_involvement
 
@@ -188,11 +189,7 @@ sets:
     - users[0].name.first
     - users[0].name.last
 question:  |
-  % if filing_basis == "filing_self":
   What is your name?
-  % else:
-  ${ signer.familiar() }, who are you filing on behalf of?
-  % endif
 fields:
   - code: |
       users[0].name_fields()
@@ -1276,41 +1273,6 @@ content: |
   
   The judge may decide that ${ you_or_they } qualify for a partial reduction in court fees even if ${ you_or_they } do not qualify for a full waiver.  
 ---
-id: Who is filing this fee waiver
-question: |
-  Whose court case is this fee waiver for?
-fields:
-  - I am filing: filing_basis
-    datatype: radio
-    choices:
-      - For myself: filing_self
-      - On behalf of a minor (someone under 18) or an incompetent adult: filing_on_behalf_of      
-  - note: |
-      Okay. List **your name** below. 
-    show if: 
-      variable: filing_basis
-      is: filing_on_behalf_of      
-  - First: signer[0].name.first
-    show if: 
-      variable: filing_basis
-      is: filing_on_behalf_of
-  - Middle: signer[0].name.middle
-    required: False
-    show if: 
-      variable: filing_basis
-      is: filing_on_behalf_of
-  - Last: signer[0].name.last
-    show if: 
-      variable: filing_basis
-      is: filing_on_behalf_of
-  - Suffix: signer[0].name.suffix
-    required: False
-    code: |
-      name_suffix()
-    show if: 
-      variable: filing_basis
-      is: filing_on_behalf_of        
----
 id: your contact information
 generic object: ALIndividual
 question: |
@@ -1383,10 +1345,10 @@ fields:
   - no label: substantial_hardship_explanation
     datatype: area
     rows: 16
-    maxlength: 1000
+    maxlength: 1200
     required: False
   - note: |
-      The form has room for about **1,000 characters** including spaces.
+      The form has room for about **1,200 characters** including spaces.
 ---
 id: any other users
 question: |
@@ -1537,26 +1499,6 @@ fields:
     default: IL      
   - ZIP code: users[0].address.zip    
 ---
-id: signer address
-#generic object: ALIndividual
-sets:
-  - signer[0].address.address
-  - signer[0].address.city
-  - signer[0].address.zip
-question: |
-  What is your address?
-fields:
-  - Street address: signer[0].address.address
-    address autocomplete: True
-  - Address line 2: signer[0].address.unit
-    required: False
-  - City: signer[0].address.city
-  - State: signer[0].address.state
-    code: |
-      states_list()
-    default: IL      
-  - ZIP code: signer[0].address.zip    
----
 id: circuit court case number
 question: |
   What is ${ your_or_obo_possessive } Circuit Court case number?
@@ -1618,14 +1560,14 @@ fields:
 ---
 id: juvenile act involvement
 question: |
-  Does the case a minor in juvenile delinquency proceedings?
+  Does the case involve a minor in juvenile delinquency proceedings?
 subquestion: |
   **ADD INFO**
 fields:
   - "Case involves a juvenile delinquency proceeding?": juvenile_act_involvement
     datatype: yesnoradio
 ---
-id: juvenile act involvement
+id: minor involvement
 question: |
   Does the case involve a minor child?
 subquestion: |
@@ -1642,10 +1584,19 @@ id: trial court judge name
 question: |
   What is the name of the trial court judge who issued the order being appealed?
 subquestion: |
-  Enter their first and last name. You do not need to add the word "Judge."
+  You do not need to add the word "Judge."
+  
+  You do not need to enter the judge's full name. You are only required to enter the judge's last name.  
 fields:
-  - Trial court judge name: trial_court_judge_name
-    maxlength: 40
+  - First: judge.name.first
+    required: False
+  - Middle: judge.name.middle
+    required: False
+  - Last: judge.name.last
+  - Suffix: judge.name.suffix
+    required: False
+    code: |
+      name_suffix()
 ---
 id: who is filing appeal
 question: |
@@ -1671,11 +1622,7 @@ id: e-signature
 question: |
   Do you want to add your e-signature to your ${ form_name }?
 subquestion: |
-  % if filing_basis != "filing_self":          
-  This program can put "**/s/ ${signer[0].name_full()}**" where you would sign your name. The court will accept this as your signature.
-  % else:
   This program can put "**/s/ ${users[0].name_full()}**" where you would sign your name. The court will accept this as your signature.
-  % endif
 
   If you do not add your **{e-signature}**, you must sign your paper form before you file it.
 
@@ -1686,7 +1633,7 @@ subquestion: |
       <li>Everything on the form is true and correct, or you have been informed or believe it to be true and correct, and</li>
       <li>You understand that making a false statement on the form is perjury and has penalties provided by law.</li>
     </ul></p>
-  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
+  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Illinois Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
   </div>
 fields:
   - "Add e-signature?": e_signature
@@ -1724,26 +1671,6 @@ script: |
     $(".da-field-buttons > div > .btn-da-custom").last().after("<br>")
     $(".da-field-buttons > div > .btn-da-custom").first().before("<br>")
   </script>
----
-code: |
-  signature_fields = ['users[0].signature']
----
-depends on:
-  - signature_choice
-id: persons signature
-question: |
-  % if filing_basis == "filing_self":
-    ${ users[0].familiar() }, please sign in the box below
-  % else:
-    ${ signer[0].familiar() }, please sign in the box below
-  % endif
-signature: users[0].signature
-under: |
-  % if filing_basis == "filing_self":
-    ${ users[0].name_full() }
-  % else:
-    ${ signer[0].name_full() }
-  % endif
 ---
 id: bring documents
 continue button field: bring_docs
@@ -1845,31 +1772,23 @@ attachments:
     pdf template file: order.pdf
     editable: False
     fields:
+      - "minor_involvement": ${ minor_involvement }
+      - "juvenile_act_involvement": ${ juvenile_act_involvement }
+      - "appellate_case_number": ${ appellate_case_number }
+      - "appellate_district": ${ appellate_district }
       - "trial_court_county": ${ trial_court.address.county }
-      - "plaintiff": |
-          % if in_re_check:
-          ${ in_re_label }
-          % else:
-          % if plaintiffs.number() > 1:
-          ${ plaintiffs[0].name_full() }, et al.
-          % else:
-          ${ plaintiffs[0].name_full() }
-          % endif
-          % endif
-      - "defendant": |
-          % if in_re_check:
-          ${ "" }
-          % else:
-          % if defendants.number() > 1:
-          ${ defendants[0].name_full() }, et al.
-          % else:
-          ${ defendants[0].name_full() }      
-          % endif
-          % endif
       - "docket_number": ${ docket_number }
-      - "docket_number__1": ${ docket_number }
-      - "docket_number__2": ${ docket_number }
+      - "trial_court_judge_name": ${ judge.name_full() }
+      - "in_re": ${ in_re_label if in_re_check else "" }
+      - "plaintiff": ${plaintiffs.full_names() }
+      - "defendant": ${defendants.full_names() }
+      - "pla_appellant": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
+      - "pla_appellee": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
+      - "def_appellant": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
+      - "def_appellee": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
       - "user_name_full": ${ users[0].name_full() }
+      - "appellate_case_number_2": ${ appellate_case_number }
+      - "appellate_case_number_3": ${ appellate_case_number }
 
   - name: application
     filename: application     
@@ -1878,87 +1797,51 @@ attachments:
     pdf template file: application.pdf
     editable: False
     fields:
+      - "minor_involvement": ${ minor_involvement }
+      - "juvenile_act_involvement": ${ juvenile_act_involvement }
+      - "appellate_case_number": ${ appellate_case_number }
+      - "appellate_district": ${ appellate_district }
+      - "appellate_case_number_2": ${ appellate_case_number }
+      - "appellate_case_number_3": ${ appellate_case_number }
+      - "appellate_case_number_4": ${ appellate_case_number }
       - "trial_court_county": ${ trial_court.address.county }
-      - "plaintiff": |
-          % if in_re_check:
-          ${ in_re_label }
-          % else:
-          % if plaintiffs.number() > 1:
-          ${ plaintiffs[0].name_full() }, et al.
-          % else:
-          ${ plaintiffs[0].name_full() }
-          % endif
-          % endif
-      - "defendant": |
-          % if in_re_check:
-          ${ "" }
-          % else:
-          % if defendants.number() > 1:
-          ${ defendants[0].name_full() }, et al.
-          % else:
-          ${ defendants[0].name_full() }      
-          % endif
-          % endif
       - "docket_number": ${ docket_number }
-      - "docket_number__1": ${ docket_number }
-      - "docket_number__2": ${ docket_number }
-      - "docket_number__3": ${ docket_number }
+      - "trial_court_judge_name": ${ judge.name_full() }
+      - "in_re": ${ in_re_label if in_re_check else "" }
+      - "plaintiff": ${plaintiffs.full_names() }
+      - "defendant": ${defendants.full_names() }
+      - "pla_appellant": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
+      - "pla_appellee": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
+      - "def_appellant": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
+      - "def_appellee": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
       - "filing_self_cb": ${ True if filing_basis == "filing_self" else ""}
       - "filing_obo_cb": ${ True if filing_basis != "filing_self" else ""}
       - "user_name_full": ${ users[0].name_full() }
-      # - "user_address_one_line": ${ users[0].address.on_one_line(bare=True) }
-      - "signer_name_full": |
-          % if filing_basis != "filing_self":
-          ${ signer[0].name_full() }
-          % else:
-          ${ users[0].name_full() }
-          % endif
+      - "user_address": ${ users[0].address.on_one_line(bare=True) }
+      - "signer_name_full": ${ users[0].name_full() }
+      - "incarcerated_no": ${ not user_is_incarcerated }
+      - "incarcerated_yes": ${ user_is_incarcerated }
+      - "inmate_id": ${ inmate_id if user_is_incarcerated else "" }
+      - "trust_account_balance": ${ thousands(trust_account_balance, show_decimals=True) if user_is_incarcerated else "" }
+      - "signer_signature_no_slash": ${ users[0].name_full() if e_signature else '' }
+      - "signer_email": ${ users[0].email if users[0].has_email_address else "" }
       - "user_address_one_line__2": ${ users[0].address.on_one_line(bare=True) }
-      - "signer_signature_no_slash": |
-          % if filing_basis != "filing_self":          
-          ${ signer[0].name_full() if e_signature else '' }
-          % else:
-          ${ users[0].name_full() if e_signature else ''  }
-          % endif
-      - "signer_email": |
-          % if filing_basis != "filing_self":
-          ${ signer[0].email }
-          % elif users[0].has_email_address:
-          ${ users[0].email }
-          % endif
-      - "signer_address_city_state_zip": |
-          % if filing_basis != "filing_self":
-          ${ signer[0].address.line_two() }
-          % else:
-          ${ users[0].address.line_two() }
-          % endif
-      - "signer_phone_number": |
-          % if filing_basis != "filing_self":
-          ${ phone_number_formatted(signer[0].phone_numbers()) }
-          % else:
-          ${ phone_number_formatted(users[0].phone_numbers()) }
-          % endif
-      - "signer_address_line_one": |
-          % if filing_basis != "filing_self":
-          ${ signer[0].address.line_one(bare=True) }
-          % else:
-          ${ users[0].address.line_one(bare=True) }
-          % endif
-#      - "signer_attorney_number": |
-#          % if filing_basis != "filing_self" and signer_attorney_number:          
-#          ${ signer_attorney_number }
-#          % endif
+      - "signer_phone_number": ${ phone_number_formatted(users[0].phone_number) }
       - "user_dependents_adults": |
+          % if not user_is_incarcerated:
           % if user_has_dependents:
           ${ user_dependents_adults }
           % else:
           0
           % endif
+          % endif
       - "user_dependents_children": |
+          % if not user_is_incarcerated:
           % if user_has_dependents:
           ${ user_dependents_children }
           % else:
           0
+          % endif
           % endif
       - "benefits_ssi": ${ True if user_benefits['SSI'] == True else '' }
       - "benefits_aabd": ${ True if user_benefits['AABD'] == True else '' }
@@ -2131,25 +2014,82 @@ attachments:
           % if not user_annual_none:
           ${ thousands(user_annual_total, show_decimals=True) }
           % endif
-      - "user_expense_rent": ${ user_expense_rent }
-      - "user_expense_rent_amount": ${ thousands(user_expense_rent_amount, show_decimals=True) }
-      - "user_expense_mortgage": ${ user_expense_mortgage }
-      - "user_expense_mortgage_amount": ${ thousands(user_expense_mortgage_amount, show_decimals=True) }
-      - "user_expense_other_mortgage": ${ user_expense_other_mortgage }
-      - "user_expense_other_mortgage_amount": ${ thousands(user_expense_other_mortgage_amount, show_decimals=True) }
-      - "user_expense_utilities": ${ user_expense_utilities }
-      - "user_expense_utilities_amount": ${ thousands(user_expense_utilities_amount, show_decimals=True) }
-      - "user_expense_food": ${ user_expense_food }
-      - "user_expense_food_amount": ${ thousands(user_expense_food_amount, show_decimals=True) }
-      - "user_expense_medical": ${ user_expense_medical }
-      - "user_expense_medical_amount": ${ thousands(user_expense_medical_amount, show_decimals=True) }
-      - "user_expense_car": ${ user_expense_car }
-      - "user_expense_car_amount": ${ thousands(user_expense_car_amount, show_decimals=True) }
-      - "user_expense_childcare": ${ user_expense_childcare }
-      - "user_expense_childcare_amount": ${ thousands(user_expense_childcare_amount, show_decimals=True) }
-      - "user_expense_child_support": ${ user_expense_child_support }
-      - "user_expense_child_support_amount": ${ thousands(user_expense_child_support_amount, show_decimals=True) }
-      - "user_expense_other": ${ user_expense_other }
+      - "user_expense_rent": |
+          % if not user_expense_none:
+          ${ user_expense_rent }
+          % endif
+      - "user_expense_rent_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_rent_amount, show_decimals=True) }
+          % endif
+      - "user_expense_mortgage": |
+          % if not user_expense_none:
+          ${ user_expense_mortgage }
+          % endif
+      - "user_expense_mortgage_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_mortgage_amount, show_decimals=True) }
+          % endif
+      - "user_expense_other_mortgage": |
+          % if not user_expense_none:
+          ${ user_expense_other_mortgage }
+          % endif
+      - "user_expense_other_mortgage_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_other_mortgage_amount, show_decimals=True) }
+          % endif
+      - "user_expense_utilities": |
+          % if not user_expense_none:
+          ${ user_expense_utilities }
+          % endif
+      - "user_expense_utilities_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_utilities_amount, show_decimals=True) }
+          % endif
+      - "user_expense_food": |
+          % if not user_expense_none:
+          ${ user_expense_food }
+          % endif
+      - "user_expense_food_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_food_amount, show_decimals=True) }
+          % endif
+      - "user_expense_medical": |
+          % if not user_expense_none:
+          ${ user_expense_medical }
+          % endif
+      - "user_expense_medical_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_medical_amount, show_decimals=True) }
+          % endif
+      - "user_expense_car": |
+          % if not user_expense_none:
+          ${ user_expense_car }
+          % endif
+      - "user_expense_car_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_car_amount, show_decimals=True) }
+          % endif
+      - "user_expense_childcare": |
+          % if not user_expense_none:
+          ${ user_expense_childcare }
+          % endif
+      - "user_expense_childcare_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_childcare_amount, show_decimals=True) }
+          % endif
+      - "user_expense_child_support": |
+          % if not user_expense_none:
+          ${ user_expense_child_support }
+          % endif
+      - "user_expense_child_support_amount": |
+          % if not user_expense_none:
+          ${ thousands(user_expense_child_support_amount, show_decimals=True) }
+          % endif
+      - "user_expense_other": |
+          % if not user_expense_none:
+          ${ user_expense_other }
+          % endif
       - "user_expense_other_amount_1":  |
           % if not user_expense_none:
           ${ thousands(user_expense_other_list[0].amount, show_decimals=True) }
@@ -2166,35 +2106,75 @@ attachments:
           % if not user_expense_none:
           ${ user_expense_other_list[1].name.text }
           % endif
-      - "user_expense_other_amount_3":  |
-          % if not user_expense_none:
-          ${ thousands(user_expense_other_list[2].amount, show_decimals=True) }
-          % endif
-      - "user_expense_other_kind_3":  |
-          % if not user_expense_none:
-          ${ user_expense_other_list[2].name.text }
-          % endif
       - "user_expense_none": ${ user_expense_none }
       - "user_expense_total": |
           % if not user_expense_none:
           ${ thousands(user_expense_total, show_decimals=True) }
           % endif
-      - "user_asset_bank_account": ${ user_asset_bank_account }
-      - "user_asset_bank_account_amount": ${ thousands(user_asset_bank_account_amount, show_decimals=True) }
-      - "user_asset_home": ${ user_asset_home }
-      - "user_asset_home_amount": ${ thousands(user_asset_home_amount, show_decimals=True) }
-      - "user_asset_home_amount_owed": ${ thousands(user_asset_home_amount_owed, show_decimals=True) }
-      - "user_asset_other_real_estate": ${ user_asset_other_real_estate }
-      - "user_asset_other_real_estate_amount": ${ thousands(user_asset_other_real_estate_amount, show_decimals=True) }
-      - "user_asset_vehicle1": ${ user_asset_vehicle1 }
-      - "user_asset_vehicle1_paid_yes": ${ user_asset_vehicle1_paid }
-      - "user_asset_vehicle1_paid_no": ${ not user_asset_vehicle1_paid }
-      - "user_asset_vehicle1_amount": ${ thousands(user_asset_vehicle1_amount, show_decimals=True) }
-      - "user_asset_vehicle2_paid_yes": ${ user_asset_vehicle2_paid if user_asset_vehicle2 else '' }
-      - "user_asset_vehicle2_paid_no": ${ not user_asset_vehicle2_paid if user_asset_vehicle2 else '' }
-      - "user_asset_vehicle2": ${ user_asset_vehicle2 }
-      - "user_asset_vehicle2_amount": ${ thousands(user_asset_vehicle2_amount, show_decimals=True) if user_asset_vehicle2 else '' }
-      - "user_asset_other": ${ user_asset_other }
+      - "user_asset_bank_account": |
+          % if not user_asset_none:
+          ${ user_asset_bank_account }
+          % endif
+      - "user_asset_bank_account_amount": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_bank_account_amount, show_decimals=True) }
+          % endif
+      - "user_asset_home": |
+          % if not user_asset_none:
+          ${ user_asset_home }
+          % endif
+      - "user_asset_home_amount": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_home_amount, show_decimals=True) }
+          % endif
+      - "user_asset_home_amount_owed": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_home_amount_owed, show_decimals=True) }
+          % endif
+      - "user_asset_other_real_estate": |
+          % if not user_asset_none:
+          ${ user_asset_other_real_estate }
+          % endif
+      - "user_asset_other_real_estate_amount": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_other_real_estate_amount, show_decimals=True) }
+          % endif
+      - "user_asset_vehicle1": |
+          % if not user_asset_none:
+          ${ user_asset_vehicle1 }
+          % endif
+      - "user_asset_vehicle1_paid_yes": |
+          % if not user_asset_none:
+          ${ user_asset_vehicle1_paid }
+          % endif
+      - "user_asset_vehicle1_paid_no": |
+          % if not user_asset_none:
+          ${ not user_asset_vehicle1_paid }
+          % endif
+      - "user_asset_vehicle1_amount": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_vehicle1_amount, show_decimals=True) }
+          % endif
+      - "user_asset_vehicle2_paid_yes": |
+          % if not user_asset_none:
+          ${ user_asset_vehicle2_paid if user_asset_vehicle2 else '' }
+          % endif
+      - "user_asset_vehicle2_paid_no": |
+          % if not user_asset_none:
+          ${ not user_asset_vehicle2_paid if user_asset_vehicle2 else '' }
+          % endif
+      - "user_asset_vehicle2": |
+          % if not user_asset_none:
+          ${ user_asset_vehicle2 }
+          % endif
+      - "user_asset_vehicle2_amount": |
+          % if not user_asset_none:
+          ${ thousands(user_asset_vehicle2_amount, show_decimals=True) if user_asset_vehicle2 else '' }
+          % endif
+      - "user_asset_other": |
+          % if not user_asset_none:
+          ${ user_asset_other }
+          % endif
       - "user_asset_other_amount_1":  |
           % if not user_asset_none:
           ${ thousands(user_asset_other_list[0].amount, show_decimals=True) }
@@ -2211,41 +2191,47 @@ attachments:
           % if not user_asset_none:
           ${ user_asset_other_list[1].name.text }
           % endif
-      - "user_asset_other_amount_3":  |
-          % if not user_asset_none:
-          ${ thousands(user_asset_other_list[2].amount, show_decimals=True) }
-          % endif
-      - "user_asset_other_kind_3":  |
-          % if not user_asset_none:
-          ${ user_asset_other_list[2].name.text }
-          % endif
       - "user_asset_none": ${ user_asset_none }
       - "substantial_hardship_explanation": ${ substantial_hardship_explanation }
       - "form_for_self": ${ True }
 ---
-id: IL fee waiver review screen
+id: review screen
 event: review_answers
 question: |
   Review screen
 subquestion: |
   Edit your answers below.
 review:
+  - note: |
+      <h4>Income</h4>
+  - Edit: user_is_incarcerated
+    button: |
+      **Are you currently incarcerated?**
+      % if user_is_incarcerated:
+      Yes. Inmate ID: ${ inmate_id }, Trust account balance: $${ thousands(trust_account_balance, show_decimals=True) }
+      % else:
+      No
+      % endif
   - Edit: user_has_dependents
     button: |
       **Supporting any dependents in same household?**
       ${ word(yesno(user_has_dependents)) }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_adults
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
+    show if: user_is_incarcerated == False
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
       ${ word(yesno(user_benefits.any_true())) }
+    show if: user_is_incarcerated == False
   - Edit: user_applied_for_benefits
     button: |
       **Applied for public benefits?**
@@ -2393,6 +2379,8 @@ review:
       **Total income (last 12 months)**:
       ${ currency(user_annual_total) }
 
+  - note: |
+      <h4>Expenses</h4>      
   - Edit: user_expense_rent
     button: |
       **Rent?**
@@ -2489,6 +2477,8 @@ review:
       **Total expenses**:
       ${ currency(user_expense_total) }
 
+  - note: |
+      <h4>Assets</h4>  
   - Edit: user_asset_bank_account
     button: |
       **Bank account or cash?**
@@ -2561,6 +2551,8 @@ review:
       **No assets?**
       ${ word(yesno(user_asset_none)) }
 
+  - note: |
+      <h4>Court case info</h4>      
   - Edit: plaintiffs.revisit
     button: |
       **Plaintiffs / Petitioners:**
@@ -2583,31 +2575,56 @@ review:
     button: |
       **In re:** ${in_re_label}
     show if: in_re_check
+  - Edit: docket_number
+    button: |
+      **Circuit Court case number**:
+      ${ docket_number }
   - Edit: 
       - trial_court_index
       - recompute:
         - trial_court
     button: |
-      **County where this case is filed:**
+      **County where the Circuit Court case was filed:**
       ${ trial_court.address.county }
-  - Edit: docket_number
+  - Edit: judge.name.last
     button: |
-      **Case number**:
+      **Circuit Court judge:** ${ judge.name_full()}
+
+  - Edit: minor_involvement
+    button: |
+      **Case involves a minor child?**
+      ${word(yesno(minor_involvement))}
+  - Edit: juvenile_act_involvement
+    button: |
+      **Case involves a juvenile delinquency proceeding?**
+      ${word(yesno(juvenile_act_involvement))}
+  - Edit: user_is_appellant
+    button: |
+      **Are you filing the appeal?**
+      ${word(yesno(user_is_appellant))}
+  - Edit: appellate_district
+    button: |
+      **In which Appellate District was the case filed?**
+      ${appellate_district}
+  - Edit: appellate_case_number
+    button: |
+      **Appellate Court case number**:
       % if dont_know_docket_number:
       I don't know.
       % else:
-      ${ docket_number }
+      ${ appellate_case_number }
       % endif
+
+  - note: |
+      <h4>About you</h4>      
+  - Edit: substantial_hardship_explanation
+    button: |
+      **Substantial hardship because**:
+      > ${ substantial_hardship_explanation }
   - Edit: users[0].name.first
     button: |
       **Your name:**
       ${ users[0].name_full() }
-    show if: filing_basis == "filing_self"
-  - Edit: users[0].name.first
-    button: |
-      **Name of person you are filing for:**
-      ${ users[0].name_full() }
-    show if: filing_basis != "filing_self"
   - Edit: users[0].address.address
     button: |
       % if filing_basis != "filing_self":
@@ -2616,57 +2633,19 @@ review:
       **Your address:**
       % endif
       ${ users[0].address.on_one_line(bare=True) }
-  - Edit: signer[0].name.first
-    button: |
-      **Your name:**
-      ${ signer[0].name_full() }
-    show if: filing_basis != "filing_self"
-  - Edit: substantial_hardship_explanation
-    button: |
-      **Substantial hardship because**:
-      > ${ substantial_hardship_explanation }
-#  - Edit: signer[0].address.address
-#    button: |
-#      **Your address:**
-#      ${ signer[0].address.on_one_line(bare=True) }
-#    show if: filing_basis != "filing_self"
-  - Edit: signer[0].has_email_address
-    button: |
-      **Your phone number**:
-      ${ phone_number_formatted(signer[0].phone_number) }      
+      
   - Edit: users[0].has_email_address
     button: |
       **Your phone number**:
-      % if filing_basis != "filing_self":
-      ${ phone_number_formatted(signer[0].phone_number) }      
-      % else:
       ${ phone_number_formatted(users[0].phone_number) }      
-      % endif
-  - Edit: signer[0].has_email_address
-    button: |
-      **Do you have an email address?**
-      ${ word(yesno(signer[0].has_email_address)) }
   - Edit: users[0].has_email_address
     button: |
       **Do you have an email address?**
-      % if filing_basis != "filing_self":
-      ${ word(yesno(signer[0].has_email_address)) }
-      % else:
       ${ word(yesno(users[0].has_email_address)) }
-      % endif
-  - Edit: signer[0].has_email_address
-    button: |
-      **Your email**:
-      ${ signer[0].email }
-    show if: signer[0].has_email_address == True
   - Edit: users[0].has_email_address
     button: |
       **Your email**:
-      % if filing_basis != "filing_self":
-      ${ signer[0].email }      
-      % else:
       ${ users[0].email }      
-      % endif
     show if: users[0].has_email_address == True
       
   - Edit: e_signature
@@ -2739,28 +2718,6 @@ columns:
       row_item.name_full() if defined("row_item.name.first") else ""
 edit:
   - name.first
-confirm: True
----
-id: edit signer review screen
-continue button field: signer.revisit
-section: Details about person asking for a fee waiver
-question: |
-  Edit signer
-subquestion: |
-  ${ signer.table }
-
-  ${ signer.add_action() }
----
-table: signer.table
-rows: signer
-columns:
-  - address: |
-      row_item.address.block() if defined("row_item.address.address") else ""
-  - phone_number: |
-      row_item.phone_number if defined("row_item.phone_number") else ""
-edit:
-  - address.address
-  - phone_number
 confirm: True
 ---
 id: other monthly income revisit review screen
@@ -2868,22 +2825,34 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
+  - Edit: user_is_incarcerated
+    button: |
+      **Are you currently incarcerated?**
+      % if user_is_incarcerated:
+      Yes. Inmate ID: ${ inmate_id }, Trust account balance: $${ thousands(trust_account_balance, show_decimals=True) }
+      % else:
+      No
+      % endif
   - Edit: user_has_dependents
     button: |
       **Supporting any dependents in same household?**
       ${ word(yesno(user_has_dependents)) }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_adults
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
+    show if: user_is_incarcerated == False
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
       ${ word(yesno(user_benefits.any_true())) }
+    show if: user_is_incarcerated == False
   - Edit: user_applied_for_benefits
     button: |
       **Applied for public benefits?**
@@ -3126,7 +3095,7 @@ review:
     show if: user_expense_other
   - Edit: user_expense_none
     button: |
-      **No expenses**:
+      **No expenses?**:
       ${ word(yesno(user_expense_none)) }
   - Edit: 
       - user_expense_none
@@ -3246,28 +3215,52 @@ review:
     button: |
       **In re:** ${in_re_label}
     show if: in_re_check
+  - Edit: docket_number
+    button: |
+      **Circuit Court case number**:
+      ${ docket_number }
   - Edit: 
       - trial_court_index
       - recompute:
         - trial_court
     button: |
-      **County where this case is filed:**
+      **County where the Circuit Court case was filed:**
       ${ trial_court.address.county }
-  - Edit: docket_number
+  - Edit: judge.name.last
     button: |
-      **Case number**:
+      **Circuit Court judge:** ${ judge.name_full()}
+
+  - Edit: minor_involvement
+    button: |
+      **Case involves a minor child?**
+      ${word(yesno(minor_involvement))}
+  - Edit: juvenile_act_involvement
+    button: |
+      **Case involves a juvenile delinquency proceeding?**
+      ${word(yesno(juvenile_act_involvement))}
+  - Edit: user_is_appellant
+    button: |
+      **Are you filing the appeal?**
+      ${word(yesno(user_is_appellant))}
+  - Edit: appellate_district
+    button: |
+      **In which Appellate District was the case filed?**
+      ${appellate_district}
+  - Edit: appellate_case_number
+    button: |
+      **Appellate Court case number**:
       % if dont_know_docket_number:
       I don't know.
       % else:
-      ${ docket_number }
+      ${ appellate_case_number }
       % endif
 
 ---
 id: about you review screen
-section: Details about person asking for a fee waiver
+section: About you
 event: section_about_you
 question: |
-  Details about person asking for a fee waiver
+  About you
 subquestion: |
   Edit your answers below.
 review:
@@ -3275,12 +3268,14 @@ review:
     button: |
       **Your name:**
       ${ users[0].name_full() }
-    show if: filing_basis == "filing_self"
-  - Edit: users[0].name.first
+  - Edit: user_is_incarcerated
     button: |
-      **Name of person you are filing for:**
-      ${ users[0].name_full() }
-    show if: filing_basis != "filing_self"
+      **Are you currently incarcerated?**
+      % if user_is_incarcerated:
+      Yes. Inmate ID: ${ inmate_id }, Trust account balance: $${ thousands(trust_account_balance, show_decimals=True) }
+      % else:
+      No
+      % endif
   - Edit: substantial_hardship_explanation
     button: |
       **Substantial hardship because**:
@@ -3289,14 +3284,17 @@ review:
     button: |
       **Supporting any dependents in same household?**
       ${ word(yesno(user_has_dependents)) }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_adults
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
+    show if: user_is_incarcerated == False
   - Edit: users[0].address.address
     button: |
       % if filing_basis != "filing_self":
@@ -3305,53 +3303,18 @@ review:
       **Your address:**
       % endif
       ${ users[0].address.on_one_line(bare=True) }
-  - Edit: signer[0].name.first
-    button: |
-      **Your name:**
-      ${ signer[0].name_full() }
-    show if: filing_basis != "filing_self"
-#  - Edit: signer[0].address.address
-#    button: |
-#      **Your address:**
-#      ${ signer[0].address.on_one_line(bare=True) }
-#    show if: filing_basis != "filing_self"
-  - Edit: signer[0].has_email_address
-    button: |
-      **Your phone number**:
-      ${ phone_number_formatted(signer[0].phone_number) }      
   - Edit: users[0].has_email_address
     button: |
       **Your phone number**:
-      % if filing_basis != "filing_self":
-      ${ phone_number_formatted(signer[0].phone_number) }      
-      % else:
       ${ phone_number_formatted(users[0].phone_number) }      
-      % endif
-  - Edit: signer[0].has_email_address
-    button: |
-      **Do you have an email address?**
-      ${ word(yesno(signer[0].has_email_address)) }
   - Edit: users[0].has_email_address
     button: |
       **Do you have an email address?**
-      % if filing_basis != "filing_self":
-      ${ word(yesno(signer[0].has_email_address)) }
-      % else:
       ${ word(yesno(users[0].has_email_address)) }
-      % endif
-  - Edit: signer[0].has_email_address
-    button: |
-      **Your email**:
-      ${ signer[0].email }
-    show if: signer[0].has_email_address == True
   - Edit: users[0].has_email_address
     button: |
       **Your email**:
-      % if filing_basis != "filing_self":
-      ${ signer[0].email }      
-      % else:
       ${ users[0].email }      
-      % endif
     show if: users[0].has_email_address == True
   - Edit: e_signature
     button: |
