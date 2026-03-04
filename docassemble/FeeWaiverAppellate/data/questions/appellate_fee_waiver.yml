@@ -80,7 +80,11 @@ code: |
         user_asset_other_list.gather()
     if not poverty_scale_get_income_limit(household_size=household_size, multiplier=1.25) is None:
       show_qualification_guess
-    
+  user_income_total
+  user_annual_total
+  user_expense_total
+  user_asset_total
+  
   set_progress(50)
   nav.set_section('section_case_info')
   user_ask_role
@@ -576,31 +580,75 @@ code: |
   if user_income_other_list.number_gathered() >= 2:
     user_income_other_list.there_is_another = False
 ---
+# replaced by other function march 2026
+#depends on:
+#  - user_income_other_list[0].amount
+#  - user_income_other_list[1].amount
+#  - user_income_household_amount
+#  - user_income_ss_amount
+#  - user_income_employment_amount
+#  - user_income_child_support_amount
+#  - user_income_unemployment_amount'
+#  - user_income_pension_amount 
+#code: |
+#  def sum_if_defined(*pargs):
+#    total = 0
+#    for source in pargs:
+#      if defined(source):
+#        total += value(source)
+#    return total        
+#  
+#  user_income_total = sum_if_defined('user_income_other_list[0].amount', 
+#      'user_income_other_list[1].amount',
+#      'user_income_household_amount',
+#      'user_income_ss_amount',
+#      'user_income_employment_amount',
+#      'user_income_child_support_amount',
+#      'user_income_unemployment_amount',
+#      'user_income_pension_amount')
+---
 depends on:
+  - user_income_other
+  - user_income_household
+  - user_income_ss
+  - user_income_employment
+  - user_income_child_support
+  - user_income_unemployment
+  - user_income_pension 
+
   - user_income_other_list[0].amount
   - user_income_other_list[1].amount
   - user_income_household_amount
   - user_income_ss_amount
   - user_income_employment_amount
   - user_income_child_support_amount
-  - user_income_unemployment_amount'
-  - user_income_pension_amount 
+  - user_income_unemployment_amount
+  - user_income_pension_amount
 code: |
-  def sum_if_defined(*pargs):
-    total = 0
-    for source in pargs:
-      if defined(source):
-        total += value(source)
-    return total        
+  user_income_total = get_income_total()
+---
+code: |
+  def get_income_total():
+    income_sum = 0
   
-  user_income_total = sum_if_defined('user_income_other_list[0].amount', 
-      'user_income_other_list[1].amount',
-      'user_income_household_amount',
-      'user_income_ss_amount',
-      'user_income_employment_amount',
-      'user_income_child_support_amount',
-      'user_income_unemployment_amount',
-      'user_income_pension_amount')
+    if not user_income_none:
+      if user_income_pension:
+        income_sum += user_income_pension_amount
+      if user_income_unemployment:
+        income_sum += user_income_unemployment_amount
+      if user_income_child_support:
+        income_sum += user_income_child_support_amount
+      if user_income_employment:
+        income_sum += user_income_employment_amount
+      if user_income_ss:
+        income_sum += user_income_ss_amount
+      if user_income_household:
+        income_sum += user_income_household_amount
+      if user_income_other:
+        income_sum += user_income_other_list[0].amount
+        income_sum += user_income_other_list[1].amount
+
+    return income_sum
 ---
 id: What income did you receive in the last year
 question: |
@@ -767,26 +815,71 @@ code: |
   if user_annual_other_list.number_gathered() >= 2:
     user_annual_other_list.there_is_another = False
 ---
+# replaced by function march 2026
+#depends on:
+#  - user_annual_other_list[0].amount
+#  - user_annual_other_list[1].amount
+#  - user_annual_household_amount
+#  - user_annual_ss_amount
+#  - user_annual_employment_amount
+#  - user_annual_child_support_amount
+#  - user_annual_unemployment_amount'
+#  - user_annual_pension_amount 
+#code: |
+#  user_annual_total = sum_if_defined(
+#      'user_annual_child_support_amount',
+#      'user_annual_employment_amount',
+#      'user_annual_household_amount',
+#      'user_annual_pension_amount',
+#      'user_annual_ss_amount',
+#      'user_annual_unemployment_amount',
+#      'user_annual_other_list[0].amount',
+#      'user_annual_other_list[1].amount'
+#  )
+---
 depends on:
+  - user_annual_other
+  - user_annual_household
+  - user_annual_ss
+  - user_annual_employment
+  - user_annual_child_support
+  - user_annual_unemployment
+  - user_annual_pension 
+
   - user_annual_other_list[0].amount
   - user_annual_other_list[1].amount
   - user_annual_household_amount
   - user_annual_ss_amount
   - user_annual_employment_amount
   - user_annual_child_support_amount
-  - user_annual_unemployment_amount'
+  - user_annual_unemployment_amount
   - user_annual_pension_amount 
 code: |
-  user_annual_total = sum_if_defined(
-      'user_annual_child_support_amount',
-      'user_annual_employment_amount',
-      'user_annual_household_amount',
-      'user_annual_pension_amount',
-      'user_annual_ss_amount',
-      'user_annual_unemployment_amount',
-      'user_annual_other_list[0].amount',
-      'user_annual_other_list[1].amount'
-  )
+  user_annual_total = get_annual_total()
+---
+code: |
+  def get_annual_total():
+    annual_sum = 0
+  
+    if not user_asset_none:
+      if user_annual_pension:
+        annual_sum += user_annual_pension_amount
+      if user_annual_unemployment:
+        annual_sum += user_annual_unemployment_amount
+      if user_annual_child_support:
+        annual_sum += user_annual_child_support_amount
+      if user_annual_employment:
+        annual_sum += user_annual_employment_amount
+      if user_annual_ss:
+        annual_sum += user_annual_ss_amount
+      if user_annual_household:
+        annual_sum += user_annual_household_amount
+      if user_annual_other:
+        annual_sum += user_annual_other_list[0].amount
+        annual_sum += user_annual_other_list[1].amount
+
+    return annual_sum
+
 ---
 id: What expenses do you have right now
 question: |
@@ -975,7 +1068,76 @@ code: |
   if user_expense_other_list.number_gathered() >= 2:
     user_expense_other_list.there_is_another = False
 ---
+#replaced by function mar 2026
+#depends on:
+#  - user_expense_car
+#  - user_expense_child_support
+#  - user_expense_childcare
+#  - user_expense_food
+#  - user_expense_medical
+#  - user_expense_mortgage
+#  - user_expense_other_mortgage
+#  - user_expense_rent
+#  - user_expense_utilities
+#  - user_expense_other
+#  - user_expense_none
+#
+#  - user_expense_car_amount
+#  - user_expense_child_support_amount
+#  - user_expense_childcare_amount
+#  - user_expense_food_amount
+#  - user_expense_medical_amount
+#  - user_expense_mortgage_amount
+#  - user_expense_other_mortgage_amount
+#  - user_expense_rent_amount
+#  - user_expense_utilities_amount
+#  - user_expense_other_list[0].amount
+#  - user_expense_other_list[1].amount
+#code: |
+#  expense_sum = 0
+#
+#  if not user_expense_none:
+#    if user_expense_car:
+#      expense_sum += user_expense_car_amount
+#    if user_expense_child_support:
+#      expense_sum += user_expense_child_support_amount
+#    if user_expense_car:
+#      expense_sum += user_expense_car_amount
+#    if user_expense_child_support:
+#      expense_sum += user_expense_child_support_amount
+#    if user_expense_childcare:
+#      expense_sum += user_expense_childcare_amount
+#    if user_expense_food:
+#      expense_sum += user_expense_food_amount
+#    if user_expense_medical:
+#      expense_sum += user_expense_medical_amount
+#    if user_expense_mortgage:
+#      expense_sum += user_expense_mortgage_amount
+#    if user_expense_other_mortgage:
+#      expense_sum += user_expense_other_mortgage_amount
+#    if user_expense_rent:
+#      expense_sum += user_expense_rent_amount
+#    if user_expense_utilities:
+#      expense_sum += user_expense_utilities_amount
+#    if user_expense_other:
+#      expense_sum += user_expense_other_list[0].amount
+#      expense_sum += user_expense_other_list[1].amount
+#
+#  user_expense_total = expense_sum
+---
 depends on:
+  - user_expense_car
+  - user_expense_child_support
+  - user_expense_childcare
+  - user_expense_food
+  - user_expense_medical
+  - user_expense_mortgage
+  - user_expense_other_mortgage
+  - user_expense_rent
+  - user_expense_utilities
+  - user_expense_other
+  - user_expense_none
+
   - user_expense_car_amount
   - user_expense_child_support_amount
   - user_expense_childcare_amount
@@ -988,19 +1150,41 @@ depends on:
   - user_expense_other_list[0].amount
   - user_expense_other_list[1].amount
 code: |
-  user_expense_total = sum_if_defined(
-      'user_expense_car_amount',
-      'user_expense_child_support_amount',
-      'user_expense_childcare_amount',
-      'user_expense_food_amount',
-      'user_expense_medical_amount',
-      'user_expense_mortgage_amount',
-      'user_expense_other_mortgage_amount',
-      'user_expense_rent_amount',
-      'user_expense_utilities_amount',
-      'user_expense_other_list[0].amount',
-      'user_expense_other_list[1].amount'
-    )
+  user_expense_total = get_expense_total()
+
+---
+code: |
+  def get_expense_total():
+    expense_sum = 0
+  
+    if not user_expense_none:
+      if user_expense_car:
+        expense_sum += user_expense_car_amount
+      if user_expense_child_support:
+        expense_sum += user_expense_child_support_amount
+      if user_expense_car:
+        expense_sum += user_expense_car_amount
+      if user_expense_child_support:
+        expense_sum += user_expense_child_support_amount
+      if user_expense_childcare:
+        expense_sum += user_expense_childcare_amount
+      if user_expense_food:
+        expense_sum += user_expense_food_amount
+      if user_expense_medical:
+        expense_sum += user_expense_medical_amount
+      if user_expense_mortgage:
+        expense_sum += user_expense_mortgage_amount
+      if user_expense_other_mortgage:
+        expense_sum += user_expense_other_mortgage_amount
+      if user_expense_rent:
+        expense_sum += user_expense_rent_amount
+      if user_expense_utilities:
+        expense_sum += user_expense_utilities_amount
+      if user_expense_other:
+        expense_sum += user_expense_other_list[0].amount
+        expense_sum += user_expense_other_list[1].amount
+
+    return expense_sum  
 ---
 depends on: filing_basis
 code: |
@@ -1158,7 +1342,33 @@ code: |
     user_asset_other_list.there_is_another = False
 
 ---
+# replaced by function march 2026
+#depends on:
+#  - user_asset_bank_account_amount
+#  - user_asset_home_amount
+#  - user_asset_other_real_estate_amount
+#  - user_asset_vehicle1_amount
+#  - user_asset_vehicle2_amount
+#  - user_asset_other_list[0].amount
+#  - user_asset_other_list[1].amount
+#code: |
+#  user_asset_total = (sum_if_defined(
+#    'user_asset_bank_account_amount'
+#    'user_asset_home_amount'
+#    'user_asset_other_real_estate_amount'
+#    'user_asset_vehicle1_amount',
+#    'user_asset_vehicle2_amount',
+#    'user_asset_other_list[0].amount',
+#    'user_asset_other_list[1].amount') - sum_if_defined('user_asset_home_amount_owed') )
+---
 depends on:
+  - user_asset_bank_account
+  - user_asset_home
+  - user_asset_other_real_estate
+  - user_asset_vehicle1
+  - user_asset_vehicle2
+  - user_asset_other
+  
   - user_asset_bank_account_amount
   - user_asset_home_amount
   - user_asset_other_real_estate_amount
@@ -1166,15 +1376,30 @@ depends on:
   - user_asset_vehicle2_amount
   - user_asset_other_list[0].amount
   - user_asset_other_list[1].amount
+
 code: |
-  user_asset_total = (sum_if_defined(
-    'user_asset_bank_account_amount'
-    'user_asset_home_amount'
-    'user_asset_other_real_estate_amount'
-    'user_asset_vehicle1_amount',
-    'user_asset_vehicle2_amount',
-    'user_asset_other_list[0].amount',
-    'user_asset_other_list[1].amount') - sum_if_defined('user_asset_home_amount_owed') )
+  user_asset_total = get_asset_total()
+---
+code: |
+  def get_asset_total():
+    asset_sum = 0
+  
+    if not user_asset_none:
+      if user_asset_bank_account:
+        asset_sum += user_asset_bank_account_amount
+      if user_asset_home:
+        asset_sum += user_asset_home_amount
+      if user_asset_other_real_estate:
+        asset_sum += user_asset_other_real_estate_amount
+      if user_asset_vehicle1:
+        asset_sum += user_asset_vehicle1_amount
+      if user_asset_vehicle2:
+        asset_sum += user_asset_vehicle2_amount
+      if user_asset_other:
+        asset_sum += user_asset_other_list[0].amount
+        asset_sum += user_asset_other_list[1].amount
+
+    return asset_sum
 ---
 depends on:
   - user_income_total
@@ -1363,7 +1588,7 @@ question: |
   % endif
 subquestion: |
   % if len(users.elements) > 1:  
-  So far you have told us about ${comma_and_list(users.full_names())}.
+  So far you have told us about ${fix_punctuation(users.full_names())}
   % endif  
 fields:
   - no label: users.there_is_another
@@ -1429,7 +1654,7 @@ question: |
   % endif
 subquestion: |
   % if len(other_parties.elements) >= 1:
-  So far you have told us about ${comma_and_list(other_parties.full_names())}.
+  So far you have told us about ${fix_punctuation(other_parties.full_names())}
   % endif
 fields:
   - no label: other_parties.there_is_another
@@ -2244,6 +2469,7 @@ review:
     button: |
       **Income from work amount (last month)**:
       ${ currency(user_income_employment_amount) }
+    show if: user_income_employment
   - Edit: user_income_ss
     button: |
       **Social Security income (last month)?**
@@ -2252,6 +2478,7 @@ review:
     button: |
       **Social Security income amount (last month)**:
       ${ currency(user_income_ss_amount) }
+    show if: user_income_ss
   - Edit: user_income_child_support
     button: |
       **Child support income (last month)?**
@@ -2260,6 +2487,7 @@ review:
     button: |
       **Child support amount (last month)**:
       ${ currency(user_income_child_support_amount) }
+    show if: user_income_child_support
   - Edit: user_income_unemployment
     button: |
       **Unemployment benefits (last month)?**
@@ -2268,6 +2496,7 @@ review:
     button: |
       **Unemployment benefits amount (last month)**:
       ${ currency(user_income_unemployment_amount) }
+    show if: user_income_unemployment
   - Edit: user_income_pension
     button: |
       **Pension (last month)?**
@@ -2276,6 +2505,7 @@ review:
     button: |
       **Pension amount (last month)**:
       ${ currency(user_income_pension_amount) }
+    show if: user_income_pension
   - Edit: user_income_household
     button: |
       **Income from household members (last month)?**
@@ -2284,6 +2514,7 @@ review:
     button: |
       **Household member income amount (last month)**:
       ${ currency(user_income_household_amount) }
+    show if: user_income_household
   - Edit: user_income_other
     button: |
       **Other income (last month)?**
@@ -2315,6 +2546,7 @@ review:
     button: |
       **Income from work amount (last 12 months)**:
       ${ currency(user_annual_employment_amount) }
+    show if: user_annual_employment
   - Edit: user_annual_ss
     button: |
       **Social Security (last 12 months)?**
@@ -2323,6 +2555,7 @@ review:
     button: |
       **Social Security income amount (last 12 months)**:
       ${ currency(user_annual_ss_amount) }
+    show if: user_annual_ss
   - Edit: user_annual_child_support
     button: |
       **Child support (last 12 months)?**
@@ -2331,6 +2564,7 @@ review:
     button: |
       **Child support amount (last 12 months)**:
       ${ currency(user_annual_child_support_amount) }
+    show if: user_annual_child_support
   - Edit: user_annual_unemployment
     button: |
       **Unemployment benefits (last 12 months)?**
@@ -2339,6 +2573,7 @@ review:
     button: |
       **Unemployment benefits amount (last 12 months)**:
       ${ currency(user_annual_unemployment_amount) }
+    show if: user_annual_unemployment
   - Edit: user_annual_pension
     button: |
       **Pension (last 12 months)?**
@@ -2347,6 +2582,7 @@ review:
     button: |
       **Pension amount (last 12 months)**:
       ${ currency(user_annual_pension_amount) }
+    show if: user_annual_pension
   - Edit: user_annual_household
     button: |
       **Household income (last 12 months)?**
@@ -2355,6 +2591,7 @@ review:
     button: |
       **Household income amount (last 12 months)**:
       ${ currency(user_annual_household_amount) }
+    show if: user_annual_household
   - Edit: user_annual_other
     button: |
       **Other income (last 12 months)?**
@@ -2380,7 +2617,7 @@ review:
       ${ currency(user_annual_total) }
 
   - note: |
-      <h4>Expenses</h4>      
+      <h4>Expenses</h4>
   - Edit: user_expense_rent
     button: |
       **Rent?**
@@ -2389,14 +2626,16 @@ review:
     button: |
       **Rent amount**:
       ${ currency(user_expense_rent_amount) }
+    show if: user_expense_rent
   - Edit: user_expense_mortgage
     button: |
       **Mortgage for home?**
       ${ word(yesno(user_expense_mortgage)) }
   - Edit: user_expense_mortgage_amount
     button: |
-      **Home mortgage mount**:
+      **Home mortgage amount**:
       ${ currency(user_expense_mortgage_amount) }
+    show if: user_expense_mortgage
   - Edit: user_expense_other_mortgage
     button: |
       **Other mortgage?**
@@ -2405,6 +2644,7 @@ review:
     button: |
       **Other mortgage amount**:
       ${ currency(user_expense_other_mortgage_amount) }
+    show if: user_expense_other_mortgage
   - Edit: user_expense_utilities
     button: |
       **Utilities?**
@@ -2413,6 +2653,7 @@ review:
     button: |
       **Utilities amount**:
       ${ currency(user_expense_utilities_amount) }
+    show if: user_expense_utilities
   - Edit: user_expense_food
     button: |
       **Food?**
@@ -2421,6 +2662,7 @@ review:
     button: |
       **Food amount**:
       ${ currency(user_expense_food_amount) }
+    show if: user_expense_food
   - Edit: user_expense_medical
     button: |
       **Medical expenses?**
@@ -2429,6 +2671,7 @@ review:
     button: |
       **Medical expenses amount**:
       ${ currency(user_expense_medical_amount) }
+    show if: user_expense_medical
   - Edit: user_expense_car
     button: |
       **Vehicle, including any loans?**
@@ -2437,6 +2680,7 @@ review:
     button: |
       **Vehicle loan amount**:
       ${ currency(user_expense_car_amount) }
+    show if: user_expense_car
   - Edit: user_expense_childcare
     button: |
       **Childcare?**
@@ -2445,6 +2689,7 @@ review:
     button: |
       **Childcare amount**:
       ${ currency(user_expense_childcare_amount) }
+    show if: user_expense_childcare
   - Edit: user_expense_child_support
     button: |
       **Child support?**
@@ -2453,6 +2698,7 @@ review:
     button: |
       **Child support amount**:
       ${ currency(user_expense_child_support_amount) }
+    show if: user_expense_child_support
   - Edit: user_expense_other
     button: |
       **Other expenses?**
@@ -2467,7 +2713,7 @@ review:
     show if: user_expense_other
   - Edit: user_expense_none
     button: |
-      **No expenses?**
+      **No expenses?**:
       ${ word(yesno(user_expense_none)) }
   - Edit: 
       - user_expense_none
@@ -2487,6 +2733,7 @@ review:
     button: |
       **Bank account or cash amount**:
       ${ currency(user_asset_bank_account_amount) }
+    show if: user_asset_bank_account
   - Edit: user_asset_home
     button: |
       **Home?**
@@ -2495,10 +2742,12 @@ review:
     button: |
       **Home value**:
       ${ currency(user_asset_home_amount) }
+    show if: user_asset_home
   - Edit: user_asset_home_amount_owed
     button: |
       **Amount owed on mortgage**:
       ${ currency(user_asset_home_amount_owed) }
+    show if: user_asset_home
   - Edit: user_asset_other_real_estate
     button: |
       **Other real estate?**
@@ -2507,6 +2756,7 @@ review:
     button: |
       **Other real estate value**:
       ${ currency(user_asset_other_real_estate_amount) }
+    show if: user_asset_other_real_estate
   - Edit: user_asset_vehicle1
     button: |
       **Vehicle?**
@@ -2515,24 +2765,27 @@ review:
     button: |
       **Vehicle value**:
       ${ currency(user_asset_vehicle1_amount) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle1_paid
     button: |
       **Vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle1_paid)) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle2
     button: |
       **Second vehicle?**
       ${ word(yesno(user_asset_vehicle2)) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle2_amount
     button: |
       **Second vehicle value**:
       ${ currency(user_asset_vehicle2_amount) }
-    show if: user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2
   - Edit: user_asset_vehicle2_paid
     button: |
       **Second vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle2_paid)) }
-    show if: user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2
   - Edit: user_asset_other
     button: |
       **Other assets?**
@@ -2865,6 +3118,7 @@ review:
     button: |
       **Income from work amount (last month)**:
       ${ currency(user_income_employment_amount) }
+    show if: user_income_employment
   - Edit: user_income_ss
     button: |
       **Social Security income (last month)?**
@@ -2873,6 +3127,7 @@ review:
     button: |
       **Social Security income amount (last month)**:
       ${ currency(user_income_ss_amount) }
+    show if: user_income_ss
   - Edit: user_income_child_support
     button: |
       **Child support income (last month)?**
@@ -2881,6 +3136,7 @@ review:
     button: |
       **Child support amount (last month)**:
       ${ currency(user_income_child_support_amount) }
+    show if: user_income_child_support
   - Edit: user_income_unemployment
     button: |
       **Unemployment benefits (last month)?**
@@ -2889,6 +3145,7 @@ review:
     button: |
       **Unemployment benefits amount (last month)**:
       ${ currency(user_income_unemployment_amount) }
+    show if: user_income_unemployment
   - Edit: user_income_pension
     button: |
       **Pension (last month)?**
@@ -2897,6 +3154,7 @@ review:
     button: |
       **Pension amount (last month)**:
       ${ currency(user_income_pension_amount) }
+    show if: user_income_pension
   - Edit: user_income_household
     button: |
       **Income from household members (last month)?**
@@ -2905,6 +3163,7 @@ review:
     button: |
       **Household member income amount (last month)**:
       ${ currency(user_income_household_amount) }
+    show if: user_income_household
   - Edit: user_income_other
     button: |
       **Other income (last month)?**
@@ -2936,6 +3195,7 @@ review:
     button: |
       **Income from work amount (last 12 months)**:
       ${ currency(user_annual_employment_amount) }
+    show if: user_annual_employment
   - Edit: user_annual_ss
     button: |
       **Social Security (last 12 months)?**
@@ -2944,6 +3204,7 @@ review:
     button: |
       **Social Security income amount (last 12 months)**:
       ${ currency(user_annual_ss_amount) }
+    show if: user_annual_ss
   - Edit: user_annual_child_support
     button: |
       **Child support (last 12 months)?**
@@ -2952,6 +3213,7 @@ review:
     button: |
       **Child support amount (last 12 months)**:
       ${ currency(user_annual_child_support_amount) }
+    show if: user_annual_child_support
   - Edit: user_annual_unemployment
     button: |
       **Unemployment benefits (last 12 months)?**
@@ -2960,6 +3222,7 @@ review:
     button: |
       **Unemployment benefits amount (last 12 months)**:
       ${ currency(user_annual_unemployment_amount) }
+    show if: user_annual_unemployment
   - Edit: user_annual_pension
     button: |
       **Pension (last 12 months)?**
@@ -2968,6 +3231,7 @@ review:
     button: |
       **Pension amount (last 12 months)**:
       ${ currency(user_annual_pension_amount) }
+    show if: user_annual_pension
   - Edit: user_annual_household
     button: |
       **Household income (last 12 months)?**
@@ -2976,6 +3240,7 @@ review:
     button: |
       **Household income amount (last 12 months)**:
       ${ currency(user_annual_household_amount) }
+    show if: user_annual_household
   - Edit: user_annual_other
     button: |
       **Other income (last 12 months)?**
@@ -3017,14 +3282,16 @@ review:
     button: |
       **Rent amount**:
       ${ currency(user_expense_rent_amount) }
+    show if: user_expense_rent
   - Edit: user_expense_mortgage
     button: |
       **Mortgage for home?**
       ${ word(yesno(user_expense_mortgage)) }
   - Edit: user_expense_mortgage_amount
     button: |
-      **Home mortgage mount**:
+      **Home mortgage amount**:
       ${ currency(user_expense_mortgage_amount) }
+    show if: user_expense_mortgage
   - Edit: user_expense_other_mortgage
     button: |
       **Other mortgage?**
@@ -3033,6 +3300,7 @@ review:
     button: |
       **Other mortgage amount**:
       ${ currency(user_expense_other_mortgage_amount) }
+    show if: user_expense_other_mortgage
   - Edit: user_expense_utilities
     button: |
       **Utilities?**
@@ -3041,6 +3309,7 @@ review:
     button: |
       **Utilities amount**:
       ${ currency(user_expense_utilities_amount) }
+    show if: user_expense_utilities
   - Edit: user_expense_food
     button: |
       **Food?**
@@ -3049,6 +3318,7 @@ review:
     button: |
       **Food amount**:
       ${ currency(user_expense_food_amount) }
+    show if: user_expense_food
   - Edit: user_expense_medical
     button: |
       **Medical expenses?**
@@ -3057,6 +3327,7 @@ review:
     button: |
       **Medical expenses amount**:
       ${ currency(user_expense_medical_amount) }
+    show if: user_expense_medical
   - Edit: user_expense_car
     button: |
       **Vehicle, including any loans?**
@@ -3065,6 +3336,7 @@ review:
     button: |
       **Vehicle loan amount**:
       ${ currency(user_expense_car_amount) }
+    show if: user_expense_car
   - Edit: user_expense_childcare
     button: |
       **Childcare?**
@@ -3073,6 +3345,7 @@ review:
     button: |
       **Childcare amount**:
       ${ currency(user_expense_childcare_amount) }
+    show if: user_expense_childcare
   - Edit: user_expense_child_support
     button: |
       **Child support?**
@@ -3081,6 +3354,7 @@ review:
     button: |
       **Child support amount**:
       ${ currency(user_expense_child_support_amount) }
+    show if: user_expense_child_support
   - Edit: user_expense_other
     button: |
       **Other expenses?**
@@ -3122,6 +3396,7 @@ review:
     button: |
       **Bank account or cash amount**:
       ${ currency(user_asset_bank_account_amount) }
+    show if: user_asset_bank_account
   - Edit: user_asset_home
     button: |
       **Home?**
@@ -3130,10 +3405,12 @@ review:
     button: |
       **Home value**:
       ${ currency(user_asset_home_amount) }
+    show if: user_asset_home
   - Edit: user_asset_home_amount_owed
     button: |
       **Amount owed on mortgage**:
       ${ currency(user_asset_home_amount_owed) }
+    show if: user_asset_home
   - Edit: user_asset_other_real_estate
     button: |
       **Other real estate?**
@@ -3142,6 +3419,7 @@ review:
     button: |
       **Other real estate value**:
       ${ currency(user_asset_other_real_estate_amount) }
+    show if: user_asset_other_real_estate
   - Edit: user_asset_vehicle1
     button: |
       **Vehicle?**
@@ -3150,32 +3428,31 @@ review:
     button: |
       **Vehicle value**:
       ${ currency(user_asset_vehicle1_amount) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle1_paid
     button: |
       **Vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle1_paid)) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle2
     button: |
       **Second vehicle?**
       ${ word(yesno(user_asset_vehicle2)) }
+    show if: user_asset_vehicle1
   - Edit: user_asset_vehicle2_amount
     button: |
       **Second vehicle value**:
       ${ currency(user_asset_vehicle2_amount) }
-    show if: user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2
   - Edit: user_asset_vehicle2_paid
     button: |
       **Second vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle2_paid)) }
-    show if: user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2
   - Edit: user_asset_other
     button: |
       **Other assets?**
       ${ word(yesno(user_asset_other)) }
-  - Edit: user_asset_none
-    button: |
-      **No assets?**
-      ${ word(yesno(user_asset_none)) }
   - Edit: user_asset_other_list.revisit
     button: |
       **Other monthly assets (Edit to change details):**
@@ -3184,6 +3461,11 @@ review:
       * ${my_var.name.text} worth $${thousands(my_var.amount, show_decimals=True)} 
       % endfor
     show if: user_asset_other
+      
+  - Edit: user_asset_none
+    button: |
+      **No assets?**
+      ${ word(yesno(user_asset_none)) }
 ---
 id: court case info review screen
 section: Court case info
