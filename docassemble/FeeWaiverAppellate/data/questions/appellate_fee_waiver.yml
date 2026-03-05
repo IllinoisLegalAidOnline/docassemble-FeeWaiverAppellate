@@ -152,7 +152,7 @@ code: |
 id: trial court county
 continue button field: case_county
 question: |
-  In which county was the Circuit Court case filed?
+  In which county was the circuit court case filed?
 subquestion: |
   This is the county is where the trial court issued the order that is being appealed.
 fields:
@@ -183,7 +183,7 @@ question: |
 subquestion: |
   Welcome to Illinois Legal Aid Online's **Fee waiver - Appellate Court** Easy Form.
   
-  This program makes a form that asks to participate in an Appellate Court case for free or at a reduced cost.
+  This program makes a *Application for Waiver of Appellate Court Fees* that asks to participate in an appellate court case for free or at a reduced cost.
   
   To learn more, read ILAO's article about [**court fees and fee waivers**](https://www.illinoislegalaid.org/node/189246).
 field: sees_nav_bar
@@ -213,8 +213,8 @@ subquestion: |
 
   You will also need to know information about the:
   
-  * Circuit Court case, including case number, county, and judge, and
-  * Appellate Court case for which you are requesting a fee waiver.
+  * Circuit court case, including case number, county, and judge, and
+  * Appellate court case for which you are requesting a fee waiver.
 
   You can find this information on other court papers you have about this case.
   
@@ -235,9 +235,9 @@ continue button field: whats_next
 question: |
   After you finish this program
 subquestion: |
-  After you download your ${ form_name }, you must file it with the court. This program **does not file** your ${ form_name } for you.
+  After you download your *Application for Waiver of Appellate Court Fees* (${ form_name }), you must file it with the court. This program **does not file** your ${ form_name } for you.
   
-  **Note:** You can file your ${ form_name } at any time during your Appellate Court case. It is usually done when a person files their first forms in Appellate Court. That way they might have all of the court fees in a case waived.
+  **Note:** You can file your ${ form_name } at any time during your appellate court case. It is usually done when a person files their first forms in appellate court. That way they might have all of the court fees in a case waived.
   
   To learn more, read the "How to Request an Appellate Court Fee Waiver" instructions you can download at the end of this program. 
 ---
@@ -252,14 +252,16 @@ content: |
 id: appellate court only
 continue button field: appellate_fee_waiver
 question: |
-  Fee waiver for Appellate Court 
+  Fee waiver for appellate court 
 subquestion: |
-  You can use this program to make Fee waiver forms if you have a case in Appellate Court.
+  You can use this program to make Fee waiver forms if you have a case in the Illinois Appellate Court.
   
-  There are different fee waiver forms to use if:
+  There are **different fee waiver forms** to use if:
 
-  * Your case is in the Circuit Court. This is also called the trial court, and it is where cases start. Examples of Ciruit Court cases are divorce, family law, evictions, small claims, foreclosures, and lawsuits for injury or property damage. Asking a judge to expunge or seal a criminal case is also started in Circuit Court. If you need to ask for a fee waiver in a Circuit Court case, use the [**Fee waiver Easy Form**](https://www.illinoislegalaid.org/node/30831). 
+  * Your case is in the circuit court. This is also called the trial court, and it is where most cases start. Examples of circuit court cases are divorce, family law, evictions, small claims, foreclosures, and lawsuits for injury or property damage. Asking a judge to expunge or seal a criminal case is also started in circuit court. If you need to ask for a fee waiver in a circuit court case, use the [**Fee waiver Easy Form**](https://www.illinoislegalaid.org/node/30831).
+  
   * Your case is a criminal, traffic, or juvenile justice case. If you need to ask for a fee waiver in a criminal case, use the [**Criminal Court fee waiver Easy Form**](https://www.illinoislegalaid.org/node/154466).
+  
   * Your case is in the Illinois Supreme Court. If you need to ask for a fee waiver in a Supreme Court case, use the [**Fee waiver - Supreme Court of Illinois Easy Form**](https://www.illinoislegalaid.org/node/158696).
 ---
 id: is user incarcerated
@@ -630,6 +632,9 @@ code: |
 code: |
   def get_income_total():
     income_sum = 0
+
+    if user_receives_benefits:
+      return income_sum
   
     if not user_income_none:
       if user_income_pension:
@@ -861,6 +866,9 @@ code: |
 code: |
   def get_annual_total():
     annual_sum = 0
+
+    if user_receives_benefits:
+      return annual_sum
   
     if not user_asset_none:
       if user_annual_pension:
@@ -1158,6 +1166,9 @@ code: |
 code: |
   def get_expense_total():
     expense_sum = 0
+
+    if user_receives_benefits:
+      return expense_sum
   
     if not user_expense_none:
       if user_expense_car:
@@ -1386,7 +1397,10 @@ code: |
 code: |
   def get_asset_total():
     asset_sum = 0
-  
+
+    if user_receives_benefits:
+      return asset_sum
+
     if not user_asset_none:
       if user_asset_bank_account:
         asset_sum += user_asset_bank_account_amount
@@ -1730,13 +1744,13 @@ fields:
 ---
 id: circuit court case number
 question: |
-  What is ${ your_or_obo_possessive } Circuit Court case number?
+  What is ${ your_or_obo_possessive } circuit Court case number?
 subquestion: |
-  The case number will be listed on ${ your_or_obo_possessive } court papers. The Circuit Clerk gives each case a number when it is filed.
+  The case number will be listed on ${ your_or_obo_possessive } court papers. The circuit clerk gives each case a number when it is filed.
   
   ${ collapse_template(case_number_help) }  
 fields:
-  - Case number: docket_number
+  - Circuit court case number: docket_number
     maxlength: 20
 ---
 template: case_number_help
@@ -1753,17 +1767,17 @@ content: |
 ---
 id: appellate court case number
 question: |
-  Do you know ${ your_or_obo_possessive } Appellate Court case number?
+  Do you know ${ your_or_obo_possessive } appellate court case number?
 subquestion: |
-  The case number will be listed on ${ your_or_obo_possessive } Appellate Court papers. The Appellate Court Clerk gives each case a number when the appeal is filed.
+  The case number will be listed on ${ your_or_obo_possessive } appellate court papers. The appellate court clerk gives each case a number when the appeal is filed.
   
-  If the appeal has not been filed yet, select **I don't know the Appellate Court case number.**
+  If the appeal has not been filed yet, select **I don't know the appellate court case number.**
 
   ${ collapse_template(case_number_help) }  
 fields:
-  - "I don't know the Appellate Court case number.": dont_know_appellate_case_number
+  - "I don't know the appellate court case number.": dont_know_appellate_case_number
     datatype: yesno    
-  - Case number: appellate_case_number
+  - Appellate court case number: appellate_case_number
     maxlength: 20
     hide if: dont_know_appellate_case_number
 validation code: |
@@ -1772,13 +1786,13 @@ validation code: |
 ---
 id: appellate district
 question: |
-  Which Appellate District was the appeal filed in?
+  Which appellate district was the appeal filed in?
 subquestion: |
-  If the case was already filed in the Appellate Court, the Appellate District should be listed near the top of the appellate court forms.
+  If the case was already filed in the appellate court, the appellate district should be listed near the top of the appellate court forms.
 
-  If you are starting a new appeal, you can use this [map of Illinois Judicial Districts](https://www.illinoiscourts.gov/courts/appellate-court/) to find the Appellate District where you should file.
+  If you are starting a new appeal, you can use this [map of Illinois Judicial Districts](https://www.illinoiscourts.gov/courts/appellate-court/) to find the appellate district where you should file.
 fields:
-  - Appellate District: appellate_district
+  - Appellate district: appellate_district
     input type: radio
     choices:
       - First: First
@@ -1791,7 +1805,7 @@ id: juvenile act involvement
 question: |
   Does the case involve a minor in juvenile delinquency proceedings?
 subquestion: |
-  **ADD INFO**
+  If this case involves a delinquent minor proceeding under the Juvenlie Court Act, select **Yes**.
 fields:
   - "Case involves a juvenile delinquency proceeding?": juvenile_act_involvement
     datatype: yesnoradio
@@ -1804,7 +1818,9 @@ subquestion: |
 
   * Parental responsibilities (custody),
   * Parenting time (visitation), or
-  * Relocation of a child.
+  * Relocation of a child (removal).
+
+  If the case involves a minor child, but not in the ways described above, select **No**.
 fields:
   - "Case involves a minor child?": minor_involvement
     datatype: yesnoradio
@@ -1812,9 +1828,7 @@ fields:
 id: trial court judge name
 question: |
   What is the name of the trial court judge who issued the order being appealed?
-subquestion: |
-  You do not need to add the word "Judge."
-  
+subquestion: |  
   You do not need to enter the judge's full name. You are only required to enter the judge's last name.  
 fields:
   - First: judge.name.first
@@ -1831,19 +1845,29 @@ id: who is filing appeal
 question: |
   Which side of the case is filing the appeal?
 subquestion: |
-  The person or company who the trial court ruled against is usually the one who files the appeal.
+  The person or company who the trial court ruled against is usually the one who files the appeal. These are the participants in your case:
 
-  **LIST PARTIES**
+  Your side:
+
+  % for item in users:
+  * ${ item.name_full() }
+  % endfor
+
+  The other side:
+
+  % for item in other_parties:
+  * ${ item.name_full() }
+  % endfor
   
-  If someone on your side of the case is asking the Appellate Court to review an order of the trial court, select **Us**.
+  If someone on your side of the case is asking the appellate court to review an order of the trial court, select **Your side**.
 
-  If someone on the other side of the case is asking the Appellate Court to review, select **Them**.
+  If someone on the other side of the case is asking the appellate court to review, select **The other side**.
 fields:
   - Who is filing the appeal?: user_is_appellant
     datatype: radio
     choices:
-      - Us: True
-      - Them: False
+      - Your side: True
+      - The other side: False
 
 
 ---
@@ -1904,7 +1928,7 @@ script: |
 id: bring documents
 continue button field: bring_docs
 question: |
-  Supporting documents
+  Next steps and supporting documents
 subquestion: |
   After you file your Fee waiver application, a judge will review it. If they have questions, you may need to give more information or documentation. For example, you may be asked to show:
   
@@ -1912,11 +1936,11 @@ subquestion: |
   * Proof of income, and
   * The value of any belongings.
   
-  **Note:** Some courts require that you submit proof of benefits or income when you file your Fee waiver application. If you are e-filing, you may need to upload proof of benefits or income.
+  **Note:** Some courts require that you submit proof of benefits or income when you file your Fee waiver application. If you are e-filing, you may need to upload proof of benefits or income. The appellate clerk will let you know how to provide more information for your application.
+
+  Once the court decides, they will send you an order. This order will say if you must pay none of the court fees, some of the court fees, or all of the court fees.
   
-  Ask your Circuit Clerk what they require. You can look up how to contact them on the [**Illinois Courts website**](https://www.illinoiscourts.gov/courts-directory/interactive-map/by-court-type).
-  
-  If you have a court date for your Fee waiver application, be sure to bring whatever documentation is requested.
+  Finally, the appellate clerk will mail or email you a copy of the order.  
 ---
 id: forms assembling
 continue button field: forms_assembling
@@ -2011,10 +2035,10 @@ attachments:
       - "in_re": ${ in_re_label if in_re_check else "" }
       - "plaintiff": ${plaintiffs.full_names() }
       - "defendant": ${defendants.full_names() }
-      - "pla_appellant": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
-      - "pla_appellee": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
-      - "def_appellant": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
-      - "def_appellee": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
+      - "pla_appellant": ${ True if (user_ask_role == "plaintiff" and user_is_appellant) or ( user_ask_role == "defendant" and not user_is_appellant) else ""}
+      - "pla_appellee": ${ True if (user_ask_role == "plaintiff" and not user_is_appellant) or ( user_ask_role == "defendant" and user_is_appellant) else ""}
+      - "def_appellant": ${ True if (user_ask_role == "plaintiff" and not user_is_appellant) or ( user_ask_role == "defendant" and user_is_appellant) else ""}
+      - "def_appellee": ${ True if (user_ask_role == "plaintiff" and user_is_appellant) or ( user_ask_role == "defendant" and not user_is_appellant) else ""}
       - "user_name_full": ${ users[0].name_full() }
       - "appellate_case_number_2": ${ appellate_case_number }
       - "appellate_case_number_3": ${ appellate_case_number }
@@ -2039,10 +2063,10 @@ attachments:
       - "in_re": ${ in_re_label if in_re_check else "" }
       - "plaintiff": ${plaintiffs.full_names() }
       - "defendant": ${defendants.full_names() }
-      - "pla_appellant": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
-      - "pla_appellee": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
-      - "def_appellant": ${ True if user_ask_role == "plaintiff" and not user_is_appellant else ""}
-      - "def_appellee": ${ True if user_ask_role == "plaintiff" and user_is_appellant else ""}
+      - "pla_appellant": ${ True if (user_ask_role == "plaintiff" and user_is_appellant) or ( user_ask_role == "defendant" and not user_is_appellant) else ""}
+      - "pla_appellee": ${ True if (user_ask_role == "plaintiff" and not user_is_appellant) or ( user_ask_role == "defendant" and user_is_appellant) else ""}
+      - "def_appellant": ${ True if (user_ask_role == "plaintiff" and not user_is_appellant) or ( user_ask_role == "defendant" and user_is_appellant) else ""}
+      - "def_appellee": ${ True if (user_ask_role == "plaintiff" and user_is_appellant) or ( user_ask_role == "defendant" and not user_is_appellant) else ""}
       - "filing_self_cb": ${ True if filing_basis == "filing_self" else ""}
       - "filing_obo_cb": ${ True if filing_basis != "filing_self" else ""}
       - "user_name_full": ${ users[0].name_full() }
@@ -2833,18 +2857,18 @@ review:
     show if: in_re_check
   - Edit: docket_number
     button: |
-      **Circuit Court case number**:
+      **Circuit court case number**:
       ${ docket_number }
   - Edit: 
       - trial_court_index
       - recompute:
         - trial_court
     button: |
-      **County where the Circuit Court case was filed:**
+      **County where the circuit court case was filed:**
       ${ trial_court.address.county }
   - Edit: judge.name.last
     button: |
-      **Circuit Court judge:** ${ judge.name_full()}
+      **Circuit court judge:** ${ judge.name_full()}
 
   - Edit: minor_involvement
     button: |
@@ -2856,15 +2880,15 @@ review:
       ${word(yesno(juvenile_act_involvement))}
   - Edit: user_is_appellant
     button: |
-      **Are you filing the appeal?**
+      **Is someone on your side of the case filing the appeal?**
       ${word(yesno(user_is_appellant))}
   - Edit: appellate_district
     button: |
-      **In which Appellate District was the case filed?**
+      **In which Appellate district was the case filed?**
       ${appellate_district}
   - Edit: appellate_case_number
     button: |
-      **Appellate Court case number**:
+      **Appellate court case number**:
       % if dont_know_docket_number:
       I don't know.
       % else:
@@ -3501,18 +3525,18 @@ review:
     show if: in_re_check
   - Edit: docket_number
     button: |
-      **Circuit Court case number**:
+      **Circuit court case number**:
       ${ docket_number }
   - Edit: 
       - trial_court_index
       - recompute:
         - trial_court
     button: |
-      **County where the Circuit Court case was filed:**
+      **County where the circuit court case was filed:**
       ${ trial_court.address.county }
   - Edit: judge.name.last
     button: |
-      **Circuit Court judge:** ${ judge.name_full()}
+      **Circuit court judge:** ${ judge.name_full()}
 
   - Edit: minor_involvement
     button: |
@@ -3524,15 +3548,15 @@ review:
       ${word(yesno(juvenile_act_involvement))}
   - Edit: user_is_appellant
     button: |
-      **Are you filing the appeal?**
+      **Is someone on your side of the case filing the appeal?**
       ${word(yesno(user_is_appellant))}
   - Edit: appellate_district
     button: |
-      **In which Appellate District was the case filed?**
+      **In which Appellate district was the case filed?**
       ${appellate_district}
   - Edit: appellate_case_number
     button: |
-      **Appellate Court case number**:
+      **Appellate court case number**:
       % if dont_know_docket_number:
       I don't know.
       % else:
