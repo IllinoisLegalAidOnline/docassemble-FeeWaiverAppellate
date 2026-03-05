@@ -339,7 +339,10 @@ fields:
 depends on:
   - user_benefits
 code: |
-  user_receives_benefits = user_benefits.any_true()
+  if user_is_incarcerated:
+    user_receives_benefits = False
+  else:  
+    user_receives_benefits = user_benefits.any_true()
 ---
 code: |
   user_has_applied_for_benefits = user_applied_for_benefits
@@ -633,8 +636,9 @@ code: |
   def get_income_total():
     income_sum = 0
 
-    if user_receives_benefits:
-      return income_sum
+    if not user_is_incarcerated:
+      if user_receives_benefits:
+        return income_sum
   
     if not user_income_none:
       if user_income_pension:
@@ -866,9 +870,10 @@ code: |
 code: |
   def get_annual_total():
     annual_sum = 0
-
-    if user_receives_benefits:
-      return annual_sum
+  
+    if not user_is_incarcerated:
+      if user_receives_benefits:
+        return annual_sum
   
     if not user_asset_none:
       if user_annual_pension:
@@ -1410,8 +1415,8 @@ code: |
         asset_sum += user_asset_other_real_estate_amount
       if user_asset_vehicle1:
         asset_sum += user_asset_vehicle1_amount
-      if user_asset_vehicle2:
-        asset_sum += user_asset_vehicle2_amount
+        if user_asset_vehicle2:
+          asset_sum += user_asset_vehicle2_amount
       if user_asset_other:
         asset_sum += user_asset_other_list[0].amount
         if user_asset_other_list.number() > 1:
@@ -1859,17 +1864,15 @@ subquestion: |
   * ${ item.name_full() }
   % endfor
   
-  If someone on your side of the case is asking the appellate court to review an order of the trial court, select **Your side**.
+  If someone on your side of the case is asking the appellate court to review an order of the trial court, select **My side**.
 
   If someone on the other side of the case is asking the appellate court to review, select **The other side**.
 fields:
   - Who is filing the appeal?: user_is_appellant
     datatype: radio
     choices:
-      - Your side: True
+      - My side: True
       - The other side: False
-
-
 ---
 id: e-signature
 question: |
@@ -1960,7 +1963,7 @@ question: |
 subquestion: |
   Your forms are ready. View and download your forms below. Click **:edit: Make changes** to fix any mistakes.
 
-  This program **does not file** your Fee waiver with the court. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
+  This program **does not file** your ${form_name} with the court. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
   
@@ -1970,7 +1973,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  **Note:** This program **does not file** your Fee waiver with the court. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
+  **Note:** This program **does not file** your ${form_name} with the court. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
   
   Thank you for using ILAO Easy Forms!
 #buttons:
