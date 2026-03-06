@@ -2448,7 +2448,7 @@ attachments:
           ${ user_asset_other_list[1].name.text }
           % endif
       - "user_asset_none": ${ user_asset_none }
-      - "substantial_hardship_explanation": ${ substantial_hardship_explanation }
+      - "substantial_hardship_explanation": ${ substantial_hardship_explanation.replace("\n", " ").replace("\r", " ") }
       - "form_for_self": ${ True }
 ---
 id: review screen
@@ -2903,7 +2903,7 @@ review:
   - Edit: substantial_hardship_explanation
     button: |
       **Substantial hardship because**:
-      > ${ substantial_hardship_explanation }
+      > ${ substantial_hardship_explanation.replace("\n", " ").replace("\r", " ") }
   - Edit: users[0].name.first
     button: |
       **Your name:**
@@ -3590,7 +3590,7 @@ review:
   - Edit: substantial_hardship_explanation
     button: |
       **Substantial hardship because**:
-      > ${ substantial_hardship_explanation }
+      > ${ substantial_hardship_explanation.replace("\n", " ").replace("\r", " ") }
   - Edit: user_has_dependents
     button: |
       **Supporting any dependents in same household?**
