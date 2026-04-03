@@ -24,7 +24,7 @@ code: |
 ---
 objects:
   - users: ALPeopleList 
-  - other_parties: ALPeopleList.using(there_are_any=True)
+  - other_parties: ALPeopleList
   - judge: ALIndividual
   - user_income_other_list: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - user_annual_other_list: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
@@ -103,7 +103,6 @@ code: |
   user_is_appellant
   appellate_district
   appellate_case_number
-
   
   set_progress(85)
   nav.set_section('section_about_you')
@@ -183,7 +182,7 @@ question: |
 subquestion: |
   Welcome to Illinois Legal Aid Online's **Fee waiver - Appellate Court** Easy Form.
   
-  This program makes a *Application for Waiver of Appellate Court Fees* that asks to participate in an appellate court case for free or at a reduced cost.
+  This program makes a *Application for Waiver of Appellate Court Fees*, which asks the court to let you participate in an appeal for free or at a reduced cost.
   
   To learn more, read ILAO's article about [**court fees and fee waivers**](https://www.illinoislegalaid.org/node/189246).
 field: sees_nav_bar
@@ -214,7 +213,7 @@ subquestion: |
   You will also need to know information about the:
   
   * Circuit court case, including case number, county, and judge, and
-  * Appellate court case for which you are requesting a fee waiver.
+  * Appellate court case for which you are requesting a fee waiver, including appellate district and who filed the appeal.
 
   You can find this information on other court papers you have about this case.
   
@@ -254,15 +253,15 @@ continue button field: appellate_fee_waiver
 question: |
   Fee waiver for appellate court 
 subquestion: |
-  You can use this program to make Fee waiver forms if you have a case in the Illinois Appellate Court.
+  You can use this program to make fee waiver forms if you have a case in the Illinois Appellate Court.
   
   There are **different fee waiver forms** to use if:
 
   * Your case is in the circuit court. This is also called the trial court, and it is where most cases start. Examples of circuit court cases are divorce, family law, evictions, small claims, foreclosures, and lawsuits for injury or property damage. Asking a judge to expunge or seal a criminal case is also started in circuit court. If you need to ask for a fee waiver in a circuit court case, use the [**Fee waiver Easy Form**](https://www.illinoislegalaid.org/node/30831).
   
-  * Your case is a criminal, traffic, or juvenile justice case. If you need to ask for a fee waiver in a criminal case, use the [**Criminal Court fee waiver Easy Form**](https://www.illinoislegalaid.org/node/154466).
-  
   * Your case is in the Illinois Supreme Court. If you need to ask for a fee waiver in a Supreme Court case, use the [**Fee waiver - Supreme Court of Illinois Easy Form**](https://www.illinoislegalaid.org/node/158696).
+  
+  If you were ordered to pay court costs (called "assessments") in a criminal or traffic case and cannot afford them, use the [**Criminal Court fee waiver Easy Form**](https://www.illinoislegalaid.org/node/154466).
 ---
 id: is user incarcerated
 question: |
@@ -350,9 +349,9 @@ code: |
 id: is the user the plaintiff or defendant?
 question: |
   % if filing_basis == "filing_self":
-  Did you start this case, or are you responding to a case that someone else filed against you?
+  Did you start the circuit court case, or did you respond to a case that someone else filed against you?
   % else:
-  Did ${ users[0].familiar() } start this case, or did they respond to a case
+  Did ${ users[0].familiar() } start the circuit court case, or did they respond to a case
   that someone else filed?
   % endif
 subquestion: |
@@ -361,8 +360,8 @@ fields:
   - no label: user_ask_role
     datatype: radio
     choices:
-      - I started the case: plaintiff
-      - I am responding to a case filed against me: defendant
+      - "I started the circuit court case.": plaintiff
+      - "I am responding to a circuit court case filed against me.": defendant
     show if:
       code: |
         filing_basis == "filing_self"
@@ -376,22 +375,22 @@ fields:
         filing_basis != "filing_self"
   - note: |
       % if filing_basis == "filing_self":
-      Okay, you are the **Plaintiff** or **Petitioner** in this case. The other 
+      Okay, you are the **Plaintiff** or **Petitioner** in the circuit court case. The other 
       side is the Defendant or Respondent.
       % else:
       Okay, ${ users[0].familiar() } is the **Plaintiff** or **Petitioner** in
-      this case. The other side is the Defendant or Respondent. 
+      the circuit court case. The other side is the Defendant or Respondent. 
       % endif
     show if:
       variable: user_ask_role
       is: "plaintiff"
   - note: |
       % if filing_basis == "filing_self":
-      Okay, you are the **Defendant** or **Respondent** in this case. The other 
+      Okay, you are the **Defendant** or **Respondent** in the circuit court case. The other 
       side is the Plaintiff or Petitioner.
       % else:
       Okay, ${ users[0].familiar() } is the **Defendant** or **Respondent** in
-      this case. The other side is the Plaintiff or Petitioner.
+      the circuit court case. The other side is the Plaintiff or Petitioner.
       % endif
     show if:
       variable: user_ask_role
@@ -399,16 +398,16 @@ fields:
 ---
 template: user_role_help
 subject: |
-  **How to determine your role in the case**
+  **How to determine your role in the circuit court case**
 content: |  
   % if filing_basis == "filing_self":
-  If you are the first person to file a form in the case, you started the case. You are the **Plaintiff** or the **Petitioner.**
+  If you were the first person to file a form in the circuit court case, you started the case. You are the **Plaintiff** or the **Petitioner.**
 
-  If you are responding to a case or court papers someone else filed, you are the **Defendant** or the **Respondent.**
+  If you were responding to a circuit court case or court papers someone else filed, you are the **Defendant** or the **Respondent.**
   % else:
-  If ${ users[0].familiar() } is the first person to file a form in the case, they started the case. ${ users[0].familiar() } is the **Plaintiff** or the **Petitioner.**
+  If ${ users[0].familiar() } was the first person to file a form in the circuit court case, they started the case. ${ users[0].familiar() } is the **Plaintiff** or the **Petitioner.**
 
-  If ${ users[0].familiar() } is responding to a case or court papers someone else filed, ${ users[0].familiar() } is the **Defendant** or the **Respondent.**
+  If ${ users[0].familiar() } was responding to a circuit court case or court papers someone else filed, ${ users[0].familiar() } is the **Defendant** or the **Respondent.**
   % endif
 ---
 id: user qualifies benefits
@@ -1601,7 +1600,7 @@ fields:
 id: any other users
 question: |
   % if al_form_type in ['starts_case','existing_case','appeal']:
-    Is anyone else on ${ your_or_obo_possessive } side of this case?
+    Is anyone else on ${ your_or_obo_possessive } side of the circuit court case?
   % else:
     % if filing_basis == "filing_self":
     Is anyone else adding their name to this form with you?
@@ -1623,9 +1622,9 @@ id: other users names
 question: |
   % if al_form_type in ['starts_case','existing_case','appeal']:
     % if filing_basis == "filing_self":
-    What is the name of the ${ ordinal(i) } person who is part of the case with you?
+    What is the name of the ${ ordinal(i) } person who is part of the circuit court case with you?
     % else:
-    What is the name of the ${ ordinal(i) } person who is part of the case with ${ users[0].familiar() }?
+    What is the name of the ${ ordinal(i) } person who is part of the circuit court case with ${ users[0].familiar() }?
     % endif
   % else:
     % if filing_basis == "filing_self":
@@ -1649,15 +1648,15 @@ content: |
 id: is there an opposing party?
 question: |
   % if al_form_type in ['starts_case','existing_case','appeal'] and user_started_case:
-  Is there a **defendant** or **respondent** in this case? 
+  Is there a **defendant** or **respondent** in the circuit court case? 
   % elif al_form_type in ['starts_case','existing_case','appeal']:
-  Is there a **plaintiff** or **petitioner** in this case?
+  Is there a **plaintiff** or **petitioner** in the circuit court case?
   % else:
   Is there someone on the other side of your dispute?
   % endif
 subquestion: |
   % if al_form_type in ['starts_case','existing_case','appeal'] and user_started_case:
-  Answer yes if there is a person or organization ${ you_or_obo_name } ${ are_is } suing or taking to court.
+  Answer yes if a person or organization ${ you_or_obo_name } ${ are_is } sued or took you to court.
   % elif al_form_type in ['starts_case','existing_case','appeal']:
   You should be able to find out from the paperwork that told ${ you_or_obo_name } to 
   go to court.
@@ -1671,9 +1670,9 @@ fields:
 id: any other opposing parties
 question: |
   % if users==plaintiffs:
-  Is there another **defendant** or **respondent** in this case?
+  Is there another **defendant** or **respondent** in the circuit court case?
   % else:
-  Is there another **plaintiff** or **petitioner** in this case?
+  Is there another **plaintiff** or **petitioner** in the circuit court case?
   % endif
 subquestion: |
   % if len(other_parties.elements) >= 1:
@@ -1691,10 +1690,10 @@ sets:
   - other_parties[i].name.suffix
 question: |
   % if users==plaintiffs:
-  What is the name of the ${ ordinal(i) } **defendant** or **respondent** in this
+  What is the name of the ${ ordinal(i) } **defendant** or **respondent** in the circuit court
   case?
   % else:
-  What is the name of the ${ ordinal(i) } **plaintiff** or **petitioner** in this case?
+  What is the name of the ${ ordinal(i) } **plaintiff** or **petitioner** in the circuit court case?
   % endif
 subquestion: |
   ${ collapse_template(long_name_help) }
@@ -1704,18 +1703,18 @@ fields:
 ---
 id: in re check
 question: |
- Does the court case have the words "**In re:**" in the name?
+ Does the circuit court case have the words "**In re:**" in the name?
 subquestion: |
-  Look at the name of the case at the top of the court papers. "In re" is often used in probate, guardianship, and some family law cases. For example, a probate case regarding Jane Doe’s estate might be called "In re: Estate of Jane Doe."
+  Look at the name of the case at the top of the circuit court papers. "In re" is often used in probate, guardianship, and some family law cases. For example, a probate case regarding Jane Doe’s estate might be called "In re: Estate of Jane Doe."
   
-  **Note:** If the court papers say "In re:" but also list the names of people in the case, you can select **No**. For example, if the case title is "In re: Marriage of Julia Smith and Tony Smith," the names you already entered will be put on your forms. 
+  **Note:** If the circuit court papers say "In re:" but also list the names of people in the case, you can select **No**. For example, if the case title is "In re: Marriage of Julia Smith and Tony Smith," the names you already entered will be put on your forms. 
 fields:
   - no label: in_re_check
     datatype: yesnoradio
 ---
 id: in re label
 question: |
-  What does it say after "**In re:**" on the court papers?
+  What does it say after "**In re:**" on the circuit court papers?
 subquestion: |
   For example, the case could be called "In re: The Will of Elena Black."
 fields:
@@ -1749,7 +1748,7 @@ fields:
 ---
 id: circuit court case number
 question: |
-  What is ${ your_or_obo_possessive } circuit Court case number?
+  What is ${ your_or_obo_possessive } circuit court case number?
 subquestion: |
   The case number will be listed on ${ your_or_obo_possessive } court papers. The circuit clerk gives each case a number when it is filed.
   
@@ -1774,11 +1773,11 @@ id: appellate court case number
 question: |
   Do you know ${ your_or_obo_possessive } appellate court case number?
 subquestion: |
-  The case number will be listed on ${ your_or_obo_possessive } appellate court papers. The appellate court clerk gives each case a number when the appeal is filed.
+  In Illinois, the appellate case number is assigned by the appellate court after the appeal is filed. The case number will be listed on ${ your_or_obo_possessive } appellate court papers.
   
   If the appeal has not been filed yet, select **I don't know the appellate court case number.**
 
-  ${ collapse_template(case_number_help) }  
+  ${ collapse_template(appellate_case_number_help) }  
 fields:
   - "I don't know the appellate court case number.": dont_know_appellate_case_number
     datatype: yesno    
@@ -1788,6 +1787,16 @@ fields:
 validation code: |
   if dont_know_appellate_case_number:
     appellate_case_number = ''      
+---
+template: appellate_case_number_help
+subject: |
+  **Where to find the appellate case number**
+content: |  
+  The case number will be listed on ${ your_or_obo_possessive } appellate court papers. It is usually at the top or in the top-right part of the first page.
+    
+  In this example, the case number is **2026 AP 000321**.
+  
+  [FILE appellate_case_number_example.png, 100%, Appellate form showing appellate case number]
 ---
 id: appellate district
 question: |
@@ -1810,7 +1819,7 @@ id: juvenile act involvement
 question: |
   Does the case involve a minor in juvenile delinquency proceedings?
 subquestion: |
-  If this case involves a delinquent minor proceeding under the Juvenlie Court Act, select **Yes**.
+  If the case involves a delinquent minor proceeding under the Juvenlie Court Act, select **Yes**.
 fields:
   - "Case involves a juvenile delinquency proceeding?": juvenile_act_involvement
     datatype: yesnoradio
@@ -1832,7 +1841,7 @@ fields:
 ---
 id: trial court judge name
 question: |
-  What is the name of the trial court judge who issued the order being appealed?
+  What is the name of the circuit court judge who issued the order being appealed?
 subquestion: |  
   You do not need to enter the judge's full name. You are only required to enter the judge's last name.  
 fields:
@@ -1848,9 +1857,9 @@ fields:
 ---
 id: who is filing appeal
 question: |
-  Which side of the case is filing the appeal?
+  Who is filing the appeal?
 subquestion: |
-  The person or company who the trial court ruled against is usually the one who files the appeal. These are the participants in your case:
+  The person or company who the circuit court ruled against is usually the one who files the appeal. These are the participants in your case:
 
   Your side:
 
@@ -1860,19 +1869,23 @@ subquestion: |
 
   The other side:
 
+  % if not other_parties.there_are_any:
+  * None entered
+  % else:
   % for item in other_parties:
   * ${ item.name_full() }
   % endfor
+  % endif
   
-  If someone on your side of the case is asking the appellate court to review an order of the trial court, select **My side**.
+  If you or someone on your side of the case is asking the appellate court to review an order of the circuit court, select **Me or someone on my side**.
 
-  If someone on the other side of the case is asking the appellate court to review, select **The other side**.
+  If you or someone on the other side of the case is asking the appellate court to review an order of the circuit court, select **Someone on the other side**.
 fields:
   - Who is filing the appeal?: user_is_appellant
     datatype: radio
     choices:
-      - My side: True
-      - The other side: False
+      - Me or someone on my side: True
+      - Someone on the other side: False
 ---
 id: e-signature
 question: |
@@ -2847,9 +2860,13 @@ review:
     button: |
       **Defendants / Respondents:**
 
+      % if not other_parties.there_are_any:
+      * None entered
+      % else:
       % for item in defendants:
         * ${ item.name_full() }
       % endfor
+      % endif
   - Edit: in_re_check
     button: |
       **Does the court case have "In re:" in the name?**  
@@ -2883,7 +2900,7 @@ review:
       ${word(yesno(juvenile_act_involvement))}
   - Edit: user_is_appellant
     button: |
-      **Is someone on your side of the case filing the appeal?**
+      **Are you or someone on your side of the case filing the appeal?**
       ${word(yesno(user_is_appellant))}
   - Edit: appellate_district
     button: |
@@ -3515,9 +3532,13 @@ review:
     button: |
       **Defendants / Respondents:**
 
+      % if not other_parties.there_are_any:
+      * None entered
+      % else:
       % for item in defendants:
         * ${ item.name_full() }
       % endfor
+      % endif
   - Edit: in_re_check
     button: |
       **Does the court case have "In re:" in the name?**  
@@ -3551,7 +3572,7 @@ review:
       ${word(yesno(juvenile_act_involvement))}
   - Edit: user_is_appellant
     button: |
-      **Is someone on your side of the case filing the appeal?**
+      **Are you or someone on your side of the case filing the appeal?**
       ${word(yesno(user_is_appellant))}
   - Edit: appellate_district
     button: |
