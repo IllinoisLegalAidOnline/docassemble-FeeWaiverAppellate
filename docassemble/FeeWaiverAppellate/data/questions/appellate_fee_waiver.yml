@@ -215,7 +215,7 @@ subquestion: |
   * Circuit court case, including case number, county, and judge, and
   * Appellate court case for which you are requesting a fee waiver, including appellate district and who filed the appeal.
 
-  You can find this information on other court papers you have about this case.
+  You can find information about court cases on your court papers or documents you received from the court clerks.
   
   Set aside 10 to 15 minutes to finish this program. You can log in and save your work to continue later. 
  
@@ -433,10 +433,16 @@ question: |
   Does anyone live with ${ users[0].familiar() } that they support
   financially?
   % endif
+subquestion: |
+  % if filing_basis == "filing_self":
+  Do not include yourself.
+  % else:
+  Do not include ${ users[0].familiar() }.
+  % endif  
 fields:
-  - Support household members: user_has_dependents
+  - Support other household members?: user_has_dependents
     datatype: yesnoradio
-  - Number of adults supported: user_dependents_adults
+  - Number of other adults supported: user_dependents_adults
     datatype: integer
     min: 0
     show if: user_has_dependents
@@ -1656,12 +1662,12 @@ question: |
   % endif
 subquestion: |
   % if al_form_type in ['starts_case','existing_case','appeal'] and user_started_case:
-  Answer yes if a person or organization ${ you_or_obo_name } ${ are_is } sued or took you to court.
+  Answer **Yes** if ${ you_or_obo_name } sued a person or organization.
   % elif al_form_type in ['starts_case','existing_case','appeal']:
   You should be able to find out from the paperwork that told ${ you_or_obo_name } to 
   go to court.
 
-  Answer yes if someone else has sued ${ you_or_obo_name } or is bringing ${ you_or_obo_name } to court.
+  Answer **Yes** if someone else has sued ${ you_or_obo_name } or is bringing ${ you_or_obo_name } to court.
   % endif
 fields:
   - no label: other_parties.there_are_any
