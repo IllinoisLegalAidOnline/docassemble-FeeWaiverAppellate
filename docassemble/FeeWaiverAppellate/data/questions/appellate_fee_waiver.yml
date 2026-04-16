@@ -420,9 +420,9 @@ question: |
   % endif
 subquestion: |
   % if filing_basis == "filing_self": 
-  Because you currently receive public benefits, you should qualify for 100% waiver of fees for your civil case.
+  Because you currently receive public benefits, you should qualify for 100% waiver of fees for your appeal.
   % else:
-  Because ${ users[0].familiar() } currently receives public benefits, they should qualify for a 100% waiver of fees in this civil case.
+  Because ${ users[0].familiar() } currently receives public benefits, they should qualify for a 100% waiver of fees in this appeal.
   % endif
 ---
 id: How many dependents do you have
@@ -1448,15 +1448,14 @@ code: |
     last_year_income_qualifies_partial = poverty_scale_income_qualifies(user_annual_total/12, multiplier=2.0)
 
 ---
-# in "do not qualify" branch, add logic using partial vars that indicate may qualfiy for partial 
 id: show_qualification_guess
 continue button field: show_qualification_guess
 question: |
   % if last_month_income_qualifies or last_year_income_qualifies:
   % if filing_basis == "filing_self":
-  You may qualify
+  You may qualify for a full fee waiver
   % else:
-  ${ users[0].familiar() } may qualify
+  ${ users[0].familiar() } may qualify for a full fee waiver
   % endif
   % else:
   % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
@@ -1476,9 +1475,9 @@ question: |
 subquestion: |
   % if last_month_income_qualifies or last_year_income_qualifies:
   % if filing_basis == "filing_self":  
-  #### Why we think that you may qualify
+  #### Why we think that you may qualify for a full fee waiver
   % else:
-  #### Why we think ${ users[0].familiar() } may qualify
+  #### Why we think ${ users[0].familiar() } may qualify for a full fee waiver
   % endif
   % else:
   % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
