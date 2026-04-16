@@ -1437,11 +1437,18 @@ code: |
     household_size = 1 + user_dependents_adults + user_dependents_children
     last_month_income_qualifies = poverty_scale_income_qualifies(user_income_total, household_size=household_size, multiplier=1.25)
     last_year_income_qualifies = poverty_scale_income_qualifies(user_annual_total/12, household_size=household_size, multiplier=1.25)
+    last_month_income_qualifies_partial = poverty_scale_income_qualifies(user_income_total, household_size=household_size, multiplier=2.0)
+    last_year_income_qualifies_partial = poverty_scale_income_qualifies(user_annual_total/12, household_size=household_size, multiplier=2.0)
+  
   else:
     household_size = 1
     last_month_income_qualifies = poverty_scale_income_qualifies(user_income_total, multiplier=1.25)
-    last_year_income_qualifies = poverty_scale_income_qualifies(user_annual_total/12, multiplier=1.25)    
+    last_year_income_qualifies = poverty_scale_income_qualifies(user_annual_total/12, multiplier=1.25)
+    last_month_income_qualifies_partial = poverty_scale_income_qualifies(user_income_total, multiplier=2.0)
+    last_year_income_qualifies_partial = poverty_scale_income_qualifies(user_annual_total/12, multiplier=2.0)
+
 ---
+# in "do not qualify" branch, add logic using partial vars that indicate may qualfiy for partial 
 id: show_qualification_guess
 continue button field: show_qualification_guess
 question: |
@@ -1452,41 +1459,55 @@ question: |
   ${ users[0].familiar() } may qualify
   % endif
   % else:
+  % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
+  % if filing_basis == "filing_self":
+  You may qualify for a partial fee waiver
+  % else:
+  ${ users[0].familiar() } may qualify for a parital fee waiver
+  % endif
+  % else:
   % if filing_basis == "filing_self":
   You likely do not qualify
   % else:
   ${ users[0].familiar() } likely does not qualify
   % endif
   % endif
+  % endif
 subquestion: |
   % if last_month_income_qualifies or last_year_income_qualifies:
   % if filing_basis == "filing_self":  
-  #### Why we think that you qualify
+  #### Why we think that you may qualify
   % else:
-  #### Why we think ${ users[0].familiar() } qualifies
+  #### Why we think ${ users[0].familiar() } may qualify
+  % endif
+  % else:
+  % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
+  % if filing_basis == "filing_self":
+  #### Why we think that you may qualify for a partial fee waiver
+  % else:
+  #### Why we think ${ users[0].familiar() } may qualify for a parital fee waiver
   % endif
   % else:
   % if filing_basis == "filing_self":
-  #### Why we think that you do not qualify
+  #### Why we think that you may not qualify
   % else:
-  #### Why we think ${ users[0].familiar() } does not qualify
+  #### Why we think ${ users[0].familiar() } may not qualify
+  % endif
   % endif
   % endif
   
   The judge will consider ${ your_or_their } income, assets, and expenses. Our prediction
   is based only on ${ your_or_their } income.
   
-  For ${ your_or_their} household size, ${ your_or_their } monthly income needs to be at or below 
-  ${ currency(poverty_scale_get_income_limit(household_size=household_size, multiplier=1.25)/12) }.
-  
-  You said that ${ your_or_their } income over the last month was 
-  ${ currency(user_income_total) }.
-  
-  You said that ${ your_or_their} income over the last 12 months was 
+  You said ${ your_or_their } income in the past month was 
+  ${ currency(user_income_total) }, and ${ your_or_their} income over the last 12 months was 
   ${ currency(user_annual_total) } (${ currency(user_annual_total/12) }
-  per month).
+  per month). The judge will look at income from last month and the average monthly income over the last 12 months.
   
-  The judge will also consider ${ your_or_their } total assets of ${ currency(user_asset_total) }
+  For a **full fee waiver**, with ${ your_or_their} household size, ${ your_or_their } monthly income needs to be at or below 
+  ${ currency(poverty_scale_get_income_limit(household_size=household_size, multiplier=1.25)/12) }. For a **partial fee waiver**, it needs to be between ${ currency(poverty_scale_get_income_limit(household_size=household_size, multiplier=1.25)/12) } and ${ currency(poverty_scale_get_income_limit(household_size=household_size, multiplier=2.0)/12) } per month.
+  
+  The judge will also consider ${ your_or_their } total assets of ${ currency(get_asset_total()) }
   and ${ your_or_their } total monthly expenses of ${ currency(user_expense_total) }.
 
   % if filing_basis == "filing_self":
@@ -2496,12 +2517,12 @@ review:
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
-    show if: user_is_incarcerated == False
+    show if: user_is_incarcerated == False and user_has_dependents
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
-    show if: user_is_incarcerated == False
+    show if: user_is_incarcerated == False and user_has_dependents
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
@@ -3148,12 +3169,12 @@ review:
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
-    show if: user_is_incarcerated == False
+    show if: user_is_incarcerated == False and user_has_dependents
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
-    show if: user_is_incarcerated == False
+    show if: user_is_incarcerated == False and user_has_dependents
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
