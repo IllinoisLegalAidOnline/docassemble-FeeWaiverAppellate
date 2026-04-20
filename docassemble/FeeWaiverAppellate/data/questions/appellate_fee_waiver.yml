@@ -298,6 +298,8 @@ subquestion: |
   % else:
   Check any benefits that ${ users[0].familiar() } currently receives.
   % endif
+
+  **Note:** Medicaid works differently than these benefits. If ${you_or_they} are on Medicaid and want to include this in ${your_or_their} fee waiver application, you can explain it on another screen.  
 fields:
   - no label: user_benefits
     datatype: checkboxes
@@ -331,6 +333,8 @@ subquestion: |
   * TANF - Temporary Assistance to Needy Families
   * SNAP - Supplemental Nutrition Assitance Program (Food Stamps)
   * General Assistance Program (GA), Transitional Assistance, or State Children and Family Assistance
+
+  **Note:** Medicaid works differently than these benefits. If ${you_or_they} are on Medicaid and want to include this in ${your_or_their} fee waiver application, you can explain it on another screen.  
 fields:
   - no label: user_applied_for_benefits
     datatype: yesnoradio
@@ -880,7 +884,7 @@ code: |
       if user_receives_benefits:
         return annual_sum
   
-    if not user_asset_none:
+    if not user_annual_none:
       if user_annual_pension:
         annual_sum += user_annual_pension_amount
       if user_annual_unemployment:
@@ -1499,8 +1503,8 @@ subquestion: |
   is based only on ${ your_or_their } income.
   
   You said ${ your_or_their } income in the past month was 
-  ${ currency(user_income_total) }, and ${ your_or_their} income over the last 12 months was 
-  ${ currency(user_annual_total) } (${ currency(user_annual_total/12) }
+  ${ currency(get_income_total()) }, and ${ your_or_their} income over the last 12 months was 
+  ${ currency(get_annual_total()) } (${ currency(get_annual_total()/12) }
   per month). The judge will look at income from last month and the average monthly income over the last 12 months.
   
   For a **full fee waiver**, with ${ your_or_their} household size, ${ your_or_their } monthly income needs to be at or below 
