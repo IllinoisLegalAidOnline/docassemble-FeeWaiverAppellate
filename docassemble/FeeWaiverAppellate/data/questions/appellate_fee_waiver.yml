@@ -439,8 +439,12 @@ question: |
   % endif
 subquestion: |
   % if filing_basis == "filing_self":
+  Click **Yes** if other household members rely on you for money or to pay their bills.
+  
   Do not include yourself.
   % else:
+  Click **Yes** if ${ users[0].familiar() }'s household members rely on ${ users[0].familiar() } for money or to pay their bills.
+  
   Do not include ${ users[0].familiar() }.
   % endif  
 fields:
@@ -463,13 +467,15 @@ question: |
   What income did ${ users[0].familiar() } receive in the last month?
   % endif
 subquestion: |
-  List the amount of income you received before taxes.
+  If entering an amount, list the income received **before taxes**.
+
+  <span style="color: red;">*</span>You must select at least one option.
 fields:
   - label: |
       % if filing_basis == "filing_self":
-      I do not have any income
+      I do not have any income.
       % else:
-      ${ users[0].familiar() } does not have any income
+      ${ users[0].familiar() } does not have any income.
       % endif
     field: user_income_none
     datatype: yesnowide
@@ -682,14 +688,15 @@ subquestion: |
   any corrections that you need.
   
   Enter the actual amount received **over the last 12 months** for each kind
-  of income. List the amount of income you received before taxes.
-
+  of income. List the amount of income you received **before taxes**.
+  
+  <span style="color: red;">*</span>You must select at least one option.
 fields:
   - label: |
       % if filing_basis == "filing_self":
-      I did not have any income in the last 12 months
+      I did not have any income in the last 12 months.
       % else:
-      ${ users[0].familiar() } did not have any income over the last 12 months
+      ${ users[0].familiar() } did not have any income over the last 12 months.
       % endif
     field: user_annual_none
     datatype: yesnowide
@@ -920,6 +927,8 @@ subquestion: |
   % else:
   If ${ users[0].familiar() } shares expenses with someone, list only the amount that ${ users[0].familiar() } pays.
   % endif
+
+  <span style="color: red;">*</span>You must select at least one option.
 fields:
   - label: |
       % if filing_basis == "filing_self":
@@ -1245,6 +1254,8 @@ subquestion: |
   % else:
   Assets are things ${ users[0].familiar() } owns, like money, their property, and other belongings.
   % endif
+
+  <span style="color: red;">*</span>You must select at least one option.
 fields:
   - "No assets": user_asset_none
     datatype: yesnowide
@@ -1318,7 +1329,6 @@ fields:
   - "Value": user_asset_other_list[i].amount
     datatype: currency
     min: 0.01
-
 ---
 id: any other assets
 question: |
@@ -1358,7 +1368,6 @@ terms:
        * A home
        * Other real estate
        * Vehicles
-
 ---
 code: |
   user_asset_other_list[i].name.text
@@ -1455,52 +1464,9 @@ code: |
 id: show_qualification_guess
 continue button field: show_qualification_guess
 question: |
-  % if last_month_income_qualifies or last_year_income_qualifies:
-  % if filing_basis == "filing_self":
-  You may qualify for a full fee waiver
-  % else:
-  ${ users[0].familiar() } may qualify for a full fee waiver
-  % endif
-  % else:
-  % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
-  % if filing_basis == "filing_self":
-  You may qualify for a partial fee waiver
-  % else:
-  ${ users[0].familiar() } may qualify for a parital fee waiver
-  % endif
-  % else:
-  % if filing_basis == "filing_self":
-  You likely do not qualify
-  % else:
-  ${ users[0].familiar() } likely does not qualify
-  % endif
-  % endif
-  % endif
-subquestion: |
-  % if last_month_income_qualifies or last_year_income_qualifies:
-  % if filing_basis == "filing_self":  
-  #### Why we think that you may qualify for a full fee waiver
-  % else:
-  #### Why we think ${ users[0].familiar() } may qualify for a full fee waiver
-  % endif
-  % else:
-  % if last_month_income_qualifies_partial or last_year_income_qualifies_partial:
-  % if filing_basis == "filing_self":
-  #### Why we think that you may qualify for a partial fee waiver
-  % else:
-  #### Why we think ${ users[0].familiar() } may qualify for a parital fee waiver
-  % endif
-  % else:
-  % if filing_basis == "filing_self":
-  #### Why we think that you may not qualify
-  % else:
-  #### Why we think ${ users[0].familiar() } may not qualify
-  % endif
-  % endif
-  % endif
-  
-  The judge will consider ${ your_or_their } income, assets, and expenses. Our prediction
-  is based only on ${ your_or_their } income.
+  How to qualify for a waiver
+subquestion: |  
+  The judge will consider ${ your_or_their } income, assets, and expenses.
   
   You said ${ your_or_their } income in the past month was 
   ${ currency(get_income_total()) }, and ${ your_or_their} income over the last 12 months was 
@@ -1803,7 +1769,7 @@ id: appellate court case number
 question: |
   Do you know ${ your_or_obo_possessive } appellate court case number?
 subquestion: |
-  In Illinois, the appellate case number is assigned by the appellate court after the appeal is filed. The case number will be listed on ${ your_or_obo_possessive } appellate court papers.
+  In Illinois, the appellate case number is assigned by the appellate court clerk after the appeal is filed. The case number will be listed on ${ your_or_obo_possessive } appellate court papers.
   
   If the appeal has not been filed yet, select **I don't know the appellate court case number.**
 
@@ -1927,7 +1893,7 @@ subquestion: |
 
   <div class="alert alert-info ilao-info" role="alert">
     <h6 class="alert-heading">What it means to sign your forms</h6>
-    <p>By signing your <i>Application for Waiver of Court Fees</i>, you are certifying that:</p>
+    <p>By signing your <i>Application for Waiver of Appellate Court Fees</i>, you are certifying that:</p>
     <p><ul>
       <li>Everything on the form is true and correct, or you have been informed or believe it to be true and correct, and</li>
       <li>You understand that making a false statement on the form is perjury and has penalties provided by law.</li>
@@ -2142,13 +2108,13 @@ attachments:
           0
           % endif
           % endif
-      - "benefits_ssi": ${ True if user_benefits['SSI'] == True else '' }
-      - "benefits_aabd": ${ True if user_benefits['AABD'] == True else '' }
-      - "benefits_ga": ${ True if user_benefits['GA'] == True else '' }
-      - "benefits_snap": ${ True if user_benefits['SNAP'] == True else '' }
-      - "benefits_tanf": ${ True if user_benefits['TANF'] == True else '' }
-      - "user_receives_benefits_yes": ${ user_benefits.any_true() }
-      - "user_receives_benefits_no": ${ user_benefits.all_false() }
+      - "benefits_ssi": ${ True if user_benefits['SSI'] == True and not user_is_incarcerated else '' }
+      - "benefits_aabd": ${ True if user_benefits['AABD'] == True and not user_is_incarcerated else '' }
+      - "benefits_ga": ${ True if user_benefits['GA'] == True and not user_is_incarcerated else '' }
+      - "benefits_snap": ${ True if user_benefits['SNAP'] == True and not user_is_incarcerated else '' }
+      - "benefits_tanf": ${ True if user_benefits['TANF'] == True and not user_is_incarcerated else '' }
+      - "user_receives_benefits_yes": ${ user_benefits.any_true() if not user_is_incarcerated else "" }
+      - "user_receives_benefits_no": ${ user_benefits.all_false() if not user_is_incarcerated else "" }
       - "user_pending_benefits_yes": ${ True if user_applied_for_benefits else '' }
       - "user_pending_benefits_no": ${ True if user_applied_for_benefits == False else '' }
       - "user_income_employment":  |
@@ -2535,6 +2501,7 @@ review:
     button: |
       **Applied for public benefits?**
       ${ word(yesno(user_applied_for_benefits)) }
+    show if: user_is_incarcerated == False
   - Edit: user_income_none
     button: |
       **Any income (last month)?**
@@ -2543,60 +2510,67 @@ review:
     button: |
       **Income from work (last month)?**
       ${ word(yesno(user_income_employment)) }
+    show if: not user_income_none
   - Edit: user_income_employment_amount
     button: |
       **Income from work amount (last month)**:
       ${ currency(user_income_employment_amount) }
-    show if: user_income_employment
+    show if: user_income_employment and not user_income_none
   - Edit: user_income_ss
     button: |
       **Social Security income (last month)?**
       ${ word(yesno(user_income_ss)) }
+    show if: not user_income_none
   - Edit: user_income_ss_amount
     button: |
       **Social Security income amount (last month)**:
       ${ currency(user_income_ss_amount) }
-    show if: user_income_ss
+    show if: user_income_ss and not user_income_none
   - Edit: user_income_child_support
     button: |
       **Child support income (last month)?**
       ${ word(yesno(user_income_child_support)) }
+    show if: not user_income_none
   - Edit: user_income_child_support_amount
     button: |
       **Child support amount (last month)**:
       ${ currency(user_income_child_support_amount) }
-    show if: user_income_child_support
+    show if: user_income_child_support and not user_income_none
   - Edit: user_income_unemployment
     button: |
       **Unemployment benefits (last month)?**
       ${ word(yesno(user_income_unemployment)) }
+    show if: not user_income_none
   - Edit: user_income_unemployment_amount
     button: |
       **Unemployment benefits amount (last month)**:
       ${ currency(user_income_unemployment_amount) }
-    show if: user_income_unemployment
+    show if: user_income_unemployment and not user_income_none
   - Edit: user_income_pension
     button: |
       **Pension (last month)?**
       ${ word(yesno(user_income_pension)) }
+    show if: not user_income_none
   - Edit: user_income_pension_amount
     button: |
       **Pension amount (last month)**:
       ${ currency(user_income_pension_amount) }
-    show if: user_income_pension
+    show if: user_income_pension and not user_income_none
   - Edit: user_income_household
     button: |
       **Income from household members (last month)?**
       ${ word(yesno(user_income_household)) }
+    show if: not user_income_none
   - Edit: user_income_household_amount
     button: |
       **Household member income amount (last month)**:
       ${ currency(user_income_household_amount) }
-    show if: user_income_household
+    show if: user_income_household and not user_income_none
   - Edit: user_income_other
     button: |
       **Other income (last month)?**
       ${ word(yesno(user_income_other)) }
+    show if: not user_income_none
   - Edit: user_income_other_list.revisit
     button: |
       **Other income from last month (Edit to change details):**
@@ -2604,7 +2578,7 @@ review:
       % for my_var in user_income_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} from ${my_var.name.text}
       % endfor
-    show if: user_income_other
+    show if: user_income_other and not user_income_none
   - Edit: 
       - user_income_none
       - recompute:
@@ -2612,6 +2586,7 @@ review:
     button: |
       **Total income (last month)**:
       ${ currency(user_income_total) }
+    show if: not user_income_none
   - Edit: user_annual_none
     button: |
       **Any income (last 12 months)?**
@@ -2620,60 +2595,67 @@ review:
     button: |
       **Income from work (last 12 months)?**
       ${ word(yesno(user_annual_employment)) }
+    show if: not user_annual_none
   - Edit: user_annual_employment_amount
     button: |
       **Income from work amount (last 12 months)**:
       ${ currency(user_annual_employment_amount) }
-    show if: user_annual_employment
+    show if: not user_annual_none and user_annual_employment
   - Edit: user_annual_ss
     button: |
       **Social Security (last 12 months)?**
       ${ word(yesno(user_annual_ss)) }
+    show if: not user_annual_none
   - Edit: user_annual_ss_amount
     button: |
       **Social Security income amount (last 12 months)**:
       ${ currency(user_annual_ss_amount) }
-    show if: user_annual_ss
+    show if: user_annual_ss and not user_annual_none
   - Edit: user_annual_child_support
     button: |
       **Child support (last 12 months)?**
       ${ word(yesno(user_annual_child_support)) }
+    show if: not user_annual_none
   - Edit: user_annual_child_support_amount
     button: |
       **Child support amount (last 12 months)**:
       ${ currency(user_annual_child_support_amount) }
-    show if: user_annual_child_support
+    show if: user_annual_child_support and not user_annual_none
   - Edit: user_annual_unemployment
     button: |
       **Unemployment benefits (last 12 months)?**
       ${ word(yesno(user_annual_unemployment)) }
+    show if: not user_annual_none
   - Edit: user_annual_unemployment_amount
     button: |
       **Unemployment benefits amount (last 12 months)**:
       ${ currency(user_annual_unemployment_amount) }
-    show if: user_annual_unemployment
+    show if: user_annual_unemployment and not user_annual_none
   - Edit: user_annual_pension
     button: |
       **Pension (last 12 months)?**
       ${ word(yesno(user_annual_pension)) }
+    show if: not user_annual_none
   - Edit: user_annual_pension_amount
     button: |
       **Pension amount (last 12 months)**:
       ${ currency(user_annual_pension_amount) }
-    show if: user_annual_pension
+    show if: user_annual_pension and not user_annual_none
   - Edit: user_annual_household
     button: |
       **Household income (last 12 months)?**
       ${ word(yesno(user_annual_household)) }
+    show if: not user_annual_none
   - Edit: user_annual_household_amount
     button: |
       **Household income amount (last 12 months)**:
       ${ currency(user_annual_household_amount) }
-    show if: user_annual_household
+    show if: user_annual_household and not user_annual_none
   - Edit: user_annual_other
     button: |
       **Other income (last 12 months)?**
       ${ word(yesno(user_annual_other)) }
+    show if: not user_annual_none
   - Edit: user_annual_other_list.revisit
     button: |
       **Other income from last year (Edit to change details):**
@@ -2681,7 +2663,7 @@ review:
       % for my_var in user_annual_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} from ${my_var.name.text}
       % endfor
-    show if: user_annual_other
+    show if: user_annual_other and not user_annual_none
   - Edit: 
       - user_annual_none
       - recompute:
@@ -2689,6 +2671,7 @@ review:
     button: |
       **Total income (last 12 months)**:
       ${ currency(user_annual_total) }
+    show if: not user_annual_none
 
   - note: |
       <h4>Expenses</h4>
@@ -2700,87 +2683,97 @@ review:
     button: |
       **Rent?**
       ${ word(yesno(user_expense_rent)) }
+    show if: not user_expense_none
   - Edit: user_expense_rent_amount
     button: |
       **Rent amount**:
       ${ currency(user_expense_rent_amount) }
-    show if: user_expense_rent
+    show if: not user_expense_none and user_expense_rent
   - Edit: user_expense_mortgage
     button: |
       **Mortgage for home?**
       ${ word(yesno(user_expense_mortgage)) }
+    show if: not user_expense_none
   - Edit: user_expense_mortgage_amount
     button: |
       **Home mortgage amount**:
       ${ currency(user_expense_mortgage_amount) }
-    show if: user_expense_mortgage
+    show if: user_expense_mortgage and not user_expense_none
   - Edit: user_expense_other_mortgage
     button: |
       **Other mortgage?**
       ${ word(yesno(user_expense_other_mortgage)) }
+    show if: not user_expense_none
   - Edit: user_expense_other_mortgage_amount
     button: |
       **Other mortgage amount**:
       ${ currency(user_expense_other_mortgage_amount) }
-    show if: user_expense_other_mortgage
+    show if: user_expense_other_mortgage and not user_expense_none
   - Edit: user_expense_utilities
     button: |
       **Utilities?**
       ${ word(yesno(user_expense_utilities)) }
+    show if: not user_expense_none
   - Edit: user_expense_utilities_amount
     button: |
       **Utilities amount**:
       ${ currency(user_expense_utilities_amount) }
-    show if: user_expense_utilities
+    show if: user_expense_utilities and not user_expense_none
   - Edit: user_expense_food
     button: |
       **Food?**
       ${ word(yesno(user_expense_food)) }
+    show if: not user_expense_none
   - Edit: user_expense_food_amount
     button: |
       **Food amount**:
       ${ currency(user_expense_food_amount) }
-    show if: user_expense_food
+    show if: user_expense_food and not user_expense_none
   - Edit: user_expense_medical
     button: |
       **Medical expenses?**
       ${ word(yesno(user_expense_medical)) }
+    show if: not user_expense_none
   - Edit: user_expense_medical_amount
     button: |
       **Medical expenses amount**:
       ${ currency(user_expense_medical_amount) }
-    show if: user_expense_medical
+    show if: user_expense_medical and not user_expense_none
   - Edit: user_expense_car
     button: |
       **Vehicle, including any loans?**
       ${ word(yesno(user_expense_car)) }
+    show if: not user_expense_none
   - Edit: user_expense_car_amount
     button: |
       **Vehicle loan amount**:
       ${ currency(user_expense_car_amount) }
-    show if: user_expense_car
+    show if: user_expense_car and not user_expense_none
   - Edit: user_expense_childcare
     button: |
       **Childcare?**
       ${ word(yesno(user_expense_childcare)) }
+    show if: not user_expense_none
   - Edit: user_expense_childcare_amount
     button: |
       **Childcare amount**:
       ${ currency(user_expense_childcare_amount) }
-    show if: user_expense_childcare
+    show if: user_expense_childcare and not user_expense_none
   - Edit: user_expense_child_support
     button: |
       **Child support?**
       ${ word(yesno(user_expense_child_support)) }
+    show if: not user_expense_none
   - Edit: user_expense_child_support_amount
     button: |
       **Child support amount**:
       ${ currency(user_expense_child_support_amount) }
-    show if: user_expense_child_support
+    show if: user_expense_child_support and not user_expense_none
   - Edit: user_expense_other
     button: |
       **Other expenses?**
       ${ word(yesno(user_expense_other)) }
+    show if: not user_expense_none
   - Edit: user_expense_other_list.revisit
     button: |
       **Other monthly expenses (Edit to change details):**
@@ -2788,7 +2781,7 @@ review:
       % for my_var in user_expense_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} for ${my_var.name.text}
       % endfor
-    show if: user_expense_other
+    show if: user_expense_other and not user_expense_none
   - Edit: 
       - user_expense_none
       - recompute:
@@ -2796,9 +2789,10 @@ review:
     button: |
       **Total expenses**:
       ${ currency(user_expense_total) }
+    show if: not user_expense_none
 
   - note: |
-      <h4>Assets</h4>  
+      <h4>Assets</h4>
   - Edit: user_asset_none
     button: |
       **Do you have any assets?**
@@ -2807,67 +2801,72 @@ review:
     button: |
       **Bank account or cash?**
       ${ word(yesno(user_asset_bank_account)) }
+    show if: not user_asset_none
   - Edit: user_asset_bank_account_amount
     button: |
       **Bank account or cash amount**:
       ${ currency(user_asset_bank_account_amount) }
-    show if: user_asset_bank_account
+    show if: user_asset_bank_account and not user_asset_none
   - Edit: user_asset_home
     button: |
       **Home?**
       ${ word(yesno(user_asset_home)) }
+    show if: not user_asset_none
   - Edit: user_asset_home_amount
     button: |
       **Home value**:
       ${ currency(user_asset_home_amount) }
-    show if: user_asset_home
+    show if: user_asset_home and not user_asset_none
   - Edit: user_asset_home_amount_owed
     button: |
       **Amount owed on mortgage**:
       ${ currency(user_asset_home_amount_owed) }
-    show if: user_asset_home
+    show if: user_asset_home and not user_asset_none
   - Edit: user_asset_other_real_estate
     button: |
       **Other real estate?**
       ${ word(yesno(user_asset_other_real_estate)) }
+    show if: not user_asset_none
   - Edit: user_asset_other_real_estate_amount
     button: |
       **Other real estate value**:
       ${ currency(user_asset_other_real_estate_amount) }
-    show if: user_asset_other_real_estate
+    show if: user_asset_other_real_estate and not user_asset_none
   - Edit: user_asset_vehicle1
     button: |
       **Vehicle?**
       ${ word(yesno(user_asset_vehicle1)) }
+    show if: not user_asset_none
   - Edit: user_asset_vehicle1_amount
     button: |
       **Vehicle value**:
       ${ currency(user_asset_vehicle1_amount) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle1_paid
     button: |
       **Vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle1_paid)) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle2
     button: |
       **Second vehicle?**
       ${ word(yesno(user_asset_vehicle2)) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle2_amount
     button: |
       **Second vehicle value**:
       ${ currency(user_asset_vehicle2_amount) }
-    show if: user_asset_vehicle1 and user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2 and not user_asset_none
   - Edit: user_asset_vehicle2_paid
     button: |
       **Second vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle2_paid)) }
-    show if: user_asset_vehicle1 and user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2 and not user_asset_none
   - Edit: user_asset_other
     button: |
       **Other assets?**
       ${ word(yesno(user_asset_other)) }
+    show if: not user_asset_none
   - Edit: user_asset_other_list.revisit
     button: |
       **Other monthly assets (Edit to change details):**
@@ -2875,7 +2874,7 @@ review:
       % for my_var in user_asset_other_list:
       * ${my_var.name.text} worth $${thousands(my_var.amount, show_decimals=True)} 
       % endfor
-    show if: user_asset_other
+    show if: user_asset_other and not user_asset_none
       
   - note: |
       <h4>Court case info</h4>      
@@ -3187,6 +3186,7 @@ review:
     button: |
       **Applied for public benefits?**
       ${ word(yesno(user_applied_for_benefits)) }
+    show if: user_is_incarcerated == False
   - Edit: user_income_none
     button: |
       **Any income (last month)?**
@@ -3195,60 +3195,67 @@ review:
     button: |
       **Income from work (last month)?**
       ${ word(yesno(user_income_employment)) }
+    show if: not user_income_none
   - Edit: user_income_employment_amount
     button: |
       **Income from work amount (last month)**:
       ${ currency(user_income_employment_amount) }
-    show if: user_income_employment
+    show if: user_income_employment and not user_income_none
   - Edit: user_income_ss
     button: |
       **Social Security income (last month)?**
       ${ word(yesno(user_income_ss)) }
+    show if: not user_income_none
   - Edit: user_income_ss_amount
     button: |
       **Social Security income amount (last month)**:
       ${ currency(user_income_ss_amount) }
-    show if: user_income_ss
+    show if: user_income_ss and not user_income_none
   - Edit: user_income_child_support
     button: |
       **Child support income (last month)?**
       ${ word(yesno(user_income_child_support)) }
+    show if: not user_income_none
   - Edit: user_income_child_support_amount
     button: |
       **Child support amount (last month)**:
       ${ currency(user_income_child_support_amount) }
-    show if: user_income_child_support
+    show if: user_income_child_support and not user_income_none
   - Edit: user_income_unemployment
     button: |
       **Unemployment benefits (last month)?**
       ${ word(yesno(user_income_unemployment)) }
+    show if: not user_income_none
   - Edit: user_income_unemployment_amount
     button: |
       **Unemployment benefits amount (last month)**:
       ${ currency(user_income_unemployment_amount) }
-    show if: user_income_unemployment
+    show if: user_income_unemployment and not user_income_none
   - Edit: user_income_pension
     button: |
       **Pension (last month)?**
       ${ word(yesno(user_income_pension)) }
+    show if: not user_income_none
   - Edit: user_income_pension_amount
     button: |
       **Pension amount (last month)**:
       ${ currency(user_income_pension_amount) }
-    show if: user_income_pension
+    show if: user_income_pension and not user_income_none
   - Edit: user_income_household
     button: |
       **Income from household members (last month)?**
       ${ word(yesno(user_income_household)) }
+    show if: not user_income_none
   - Edit: user_income_household_amount
     button: |
       **Household member income amount (last month)**:
       ${ currency(user_income_household_amount) }
-    show if: user_income_household
+    show if: user_income_household and not user_income_none
   - Edit: user_income_other
     button: |
       **Other income (last month)?**
       ${ word(yesno(user_income_other)) }
+    show if: not user_income_none
   - Edit: user_income_other_list.revisit
     button: |
       **Other income from last month (Edit to change details):**
@@ -3256,7 +3263,7 @@ review:
       % for my_var in user_income_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} from ${my_var.name.text}
       % endfor
-    show if: user_income_other
+    show if: user_income_other and not user_income_none
   - Edit: 
       - user_income_none
       - recompute:
@@ -3264,68 +3271,76 @@ review:
     button: |
       **Total income (last month)**:
       ${ currency(user_income_total) }
+    show if: not user_income_none
   - Edit: user_annual_none
     button: |
       **Any income (last 12 months)?**
-      ${ word(yesno(not user_annual_none)) }
+      ${ word(yesno( not user_annual_none)) }
   - Edit: user_annual_employment
     button: |
       **Income from work (last 12 months)?**
       ${ word(yesno(user_annual_employment)) }
+    show if: not user_annual_none
   - Edit: user_annual_employment_amount
     button: |
       **Income from work amount (last 12 months)**:
       ${ currency(user_annual_employment_amount) }
-    show if: user_annual_employment
+    show if: not user_annual_none and user_annual_employment
   - Edit: user_annual_ss
     button: |
       **Social Security (last 12 months)?**
       ${ word(yesno(user_annual_ss)) }
+    show if: not user_annual_none
   - Edit: user_annual_ss_amount
     button: |
       **Social Security income amount (last 12 months)**:
       ${ currency(user_annual_ss_amount) }
-    show if: user_annual_ss
+    show if: user_annual_ss and not user_annual_none
   - Edit: user_annual_child_support
     button: |
       **Child support (last 12 months)?**
       ${ word(yesno(user_annual_child_support)) }
+    show if: not user_annual_none
   - Edit: user_annual_child_support_amount
     button: |
       **Child support amount (last 12 months)**:
       ${ currency(user_annual_child_support_amount) }
-    show if: user_annual_child_support
+    show if: user_annual_child_support and not user_annual_none
   - Edit: user_annual_unemployment
     button: |
       **Unemployment benefits (last 12 months)?**
       ${ word(yesno(user_annual_unemployment)) }
+    show if: not user_annual_none
   - Edit: user_annual_unemployment_amount
     button: |
       **Unemployment benefits amount (last 12 months)**:
       ${ currency(user_annual_unemployment_amount) }
-    show if: user_annual_unemployment
+    show if: user_annual_unemployment and not user_annual_none
   - Edit: user_annual_pension
     button: |
       **Pension (last 12 months)?**
       ${ word(yesno(user_annual_pension)) }
+    show if: not user_annual_none
   - Edit: user_annual_pension_amount
     button: |
       **Pension amount (last 12 months)**:
       ${ currency(user_annual_pension_amount) }
-    show if: user_annual_pension
+    show if: user_annual_pension and not user_annual_none
   - Edit: user_annual_household
     button: |
       **Household income (last 12 months)?**
       ${ word(yesno(user_annual_household)) }
+    show if: not user_annual_none
   - Edit: user_annual_household_amount
     button: |
       **Household income amount (last 12 months)**:
       ${ currency(user_annual_household_amount) }
-    show if: user_annual_household
+    show if: user_annual_household and not user_annual_none
   - Edit: user_annual_other
     button: |
       **Other income (last 12 months)?**
       ${ word(yesno(user_annual_other)) }
+    show if: not user_annual_none
   - Edit: user_annual_other_list.revisit
     button: |
       **Other income from last year (Edit to change details):**
@@ -3333,7 +3348,7 @@ review:
       % for my_var in user_annual_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} from ${my_var.name.text}
       % endfor
-    show if: user_annual_other
+    show if: user_annual_other and not user_annual_none
   - Edit: 
       - user_annual_none
       - recompute:
@@ -3341,6 +3356,7 @@ review:
     button: |
       **Total income (last 12 months)**:
       ${ currency(user_annual_total) }
+    show if: not user_annual_none
 
 ---
 id: expenses review screen
@@ -3359,87 +3375,97 @@ review:
     button: |
       **Rent?**
       ${ word(yesno(user_expense_rent)) }
+    show if: not user_expense_none
   - Edit: user_expense_rent_amount
     button: |
       **Rent amount**:
       ${ currency(user_expense_rent_amount) }
-    show if: user_expense_rent
+    show if: not user_expense_none and user_expense_rent
   - Edit: user_expense_mortgage
     button: |
       **Mortgage for home?**
       ${ word(yesno(user_expense_mortgage)) }
+    show if: not user_expense_none
   - Edit: user_expense_mortgage_amount
     button: |
       **Home mortgage amount**:
       ${ currency(user_expense_mortgage_amount) }
-    show if: user_expense_mortgage
+    show if: user_expense_mortgage and not user_expense_none
   - Edit: user_expense_other_mortgage
     button: |
       **Other mortgage?**
       ${ word(yesno(user_expense_other_mortgage)) }
+    show if: not user_expense_none
   - Edit: user_expense_other_mortgage_amount
     button: |
       **Other mortgage amount**:
       ${ currency(user_expense_other_mortgage_amount) }
-    show if: user_expense_other_mortgage
+    show if: user_expense_other_mortgage and not user_expense_none
   - Edit: user_expense_utilities
     button: |
       **Utilities?**
       ${ word(yesno(user_expense_utilities)) }
+    show if: not user_expense_none
   - Edit: user_expense_utilities_amount
     button: |
       **Utilities amount**:
       ${ currency(user_expense_utilities_amount) }
-    show if: user_expense_utilities
+    show if: user_expense_utilities and not user_expense_none
   - Edit: user_expense_food
     button: |
       **Food?**
       ${ word(yesno(user_expense_food)) }
+    show if: not user_expense_none
   - Edit: user_expense_food_amount
     button: |
       **Food amount**:
       ${ currency(user_expense_food_amount) }
-    show if: user_expense_food
+    show if: user_expense_food and not user_expense_none
   - Edit: user_expense_medical
     button: |
       **Medical expenses?**
       ${ word(yesno(user_expense_medical)) }
+    show if: not user_expense_none
   - Edit: user_expense_medical_amount
     button: |
       **Medical expenses amount**:
       ${ currency(user_expense_medical_amount) }
-    show if: user_expense_medical
+    show if: user_expense_medical and not user_expense_none
   - Edit: user_expense_car
     button: |
       **Vehicle, including any loans?**
       ${ word(yesno(user_expense_car)) }
+    show if: not user_expense_none
   - Edit: user_expense_car_amount
     button: |
       **Vehicle loan amount**:
       ${ currency(user_expense_car_amount) }
-    show if: user_expense_car
+    show if: user_expense_car and not user_expense_none
   - Edit: user_expense_childcare
     button: |
       **Childcare?**
       ${ word(yesno(user_expense_childcare)) }
+    show if: not user_expense_none
   - Edit: user_expense_childcare_amount
     button: |
       **Childcare amount**:
       ${ currency(user_expense_childcare_amount) }
-    show if: user_expense_childcare
+    show if: user_expense_childcare and not user_expense_none
   - Edit: user_expense_child_support
     button: |
       **Child support?**
       ${ word(yesno(user_expense_child_support)) }
+    show if: not user_expense_none
   - Edit: user_expense_child_support_amount
     button: |
       **Child support amount**:
       ${ currency(user_expense_child_support_amount) }
-    show if: user_expense_child_support
+    show if: user_expense_child_support and not user_expense_none
   - Edit: user_expense_other
     button: |
       **Other expenses?**
       ${ word(yesno(user_expense_other)) }
+    show if: not user_expense_none
   - Edit: user_expense_other_list.revisit
     button: |
       **Other monthly expenses (Edit to change details):**
@@ -3447,7 +3473,7 @@ review:
       % for my_var in user_expense_other_list:
       * $${thousands(my_var.amount, show_decimals=True)} for ${my_var.name.text}
       % endfor
-    show if: user_expense_other
+    show if: user_expense_other and not user_expense_none
   - Edit: 
       - user_expense_none
       - recompute:
@@ -3455,6 +3481,7 @@ review:
     button: |
       **Total expenses**:
       ${ currency(user_expense_total) }
+    show if: not user_expense_none
 
 ---
 id: assets review screen
@@ -3473,67 +3500,72 @@ review:
     button: |
       **Bank account or cash?**
       ${ word(yesno(user_asset_bank_account)) }
+    show if: not user_asset_none
   - Edit: user_asset_bank_account_amount
     button: |
       **Bank account or cash amount**:
       ${ currency(user_asset_bank_account_amount) }
-    show if: user_asset_bank_account
+    show if: user_asset_bank_account and not user_asset_none
   - Edit: user_asset_home
     button: |
       **Home?**
       ${ word(yesno(user_asset_home)) }
+    show if: not user_asset_none
   - Edit: user_asset_home_amount
     button: |
       **Home value**:
       ${ currency(user_asset_home_amount) }
-    show if: user_asset_home
+    show if: user_asset_home and not user_asset_none
   - Edit: user_asset_home_amount_owed
     button: |
       **Amount owed on mortgage**:
       ${ currency(user_asset_home_amount_owed) }
-    show if: user_asset_home
+    show if: user_asset_home and not user_asset_none
   - Edit: user_asset_other_real_estate
     button: |
       **Other real estate?**
       ${ word(yesno(user_asset_other_real_estate)) }
+    show if: not user_asset_none
   - Edit: user_asset_other_real_estate_amount
     button: |
       **Other real estate value**:
       ${ currency(user_asset_other_real_estate_amount) }
-    show if: user_asset_other_real_estate
+    show if: user_asset_other_real_estate and not user_asset_none
   - Edit: user_asset_vehicle1
     button: |
       **Vehicle?**
       ${ word(yesno(user_asset_vehicle1)) }
+    show if: not user_asset_none
   - Edit: user_asset_vehicle1_amount
     button: |
       **Vehicle value**:
       ${ currency(user_asset_vehicle1_amount) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle1_paid
     button: |
       **Vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle1_paid)) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle2
     button: |
       **Second vehicle?**
       ${ word(yesno(user_asset_vehicle2)) }
-    show if: user_asset_vehicle1
+    show if: user_asset_vehicle1 and not user_asset_none
   - Edit: user_asset_vehicle2_amount
     button: |
       **Second vehicle value**:
       ${ currency(user_asset_vehicle2_amount) }
-    show if: user_asset_vehicle1 and user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2 and not user_asset_none
   - Edit: user_asset_vehicle2_paid
     button: |
       **Second vehicle is paid in full?**
       ${ word(yesno(user_asset_vehicle2_paid)) }
-    show if: user_asset_vehicle1 and user_asset_vehicle2
+    show if: user_asset_vehicle1 and user_asset_vehicle2 and not user_asset_none
   - Edit: user_asset_other
     button: |
       **Other assets?**
       ${ word(yesno(user_asset_other)) }
+    show if: not user_asset_none
   - Edit: user_asset_other_list.revisit
     button: |
       **Other monthly assets (Edit to change details):**
@@ -3541,7 +3573,7 @@ review:
       % for my_var in user_asset_other_list:
       * ${my_var.name.text} worth $${thousands(my_var.amount, show_decimals=True)} 
       % endfor
-    show if: user_asset_other
+    show if: user_asset_other and not user_asset_none
 ---
 id: court case info review screen
 section: Court case info
