@@ -339,8 +339,7 @@ fields:
   - no label: user_applied_for_benefits
     datatype: yesnoradio
 ---
-depends on:
-  - user_benefits
+reconsider: True
 code: |
   if user_is_incarcerated:
     user_receives_benefits = False
