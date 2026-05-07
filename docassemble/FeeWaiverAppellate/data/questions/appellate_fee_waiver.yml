@@ -2480,20 +2480,22 @@ review:
     button: |
       **Supporting any dependents in same household?**
       ${ word(yesno(user_has_dependents)) }
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_adults
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
-    show if: user_has_dependents
+    show if: user_has_dependents and user_is_incarcerated == False
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
-    show if: user_has_dependents
+    show if: user_has_dependents and user_is_incarcerated == False
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
       ${ word(yesno(user_benefits.any_true())) }
+    show if: user_is_incarcerated == False
   - Edit: user_applied_for_benefits
     button: |
       **Applied for public benefits?**
@@ -3162,21 +3164,22 @@ review:
     button: |
       **Supporting any dependents in same household?**
       ${ word(yesno(user_has_dependents)) }
-
+    show if: user_is_incarcerated == False
   - Edit: user_dependents_adults
     button: |
       **Number of adult dependents**:
       ${ user_dependents_adults }
-    show if: user_has_dependents
+    show if: user_has_dependents and user_is_incarcerated == False
   - Edit: user_dependents_children
     button: |
       **Number of minor dependents**:
       ${ user_dependents_children }
-    show if: user_has_dependents
+    show if: user_has_dependents and user_is_incarcerated == False
   - Edit: user_benefits
     button: |
       **Receives public benefits?**
       ${ word(yesno(user_benefits.any_true())) }
+    show if: user_is_incarcerated == False
   - Edit: user_applied_for_benefits
     button: |
       **Applied for public benefits?**
