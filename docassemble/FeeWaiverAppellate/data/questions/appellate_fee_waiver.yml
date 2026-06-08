@@ -1154,10 +1154,6 @@ code: |
         expense_sum += user_expense_car_amount
       if user_expense_child_support:
         expense_sum += user_expense_child_support_amount
-      if user_expense_car:
-        expense_sum += user_expense_car_amount
-      if user_expense_child_support:
-        expense_sum += user_expense_child_support_amount
       if user_expense_childcare:
         expense_sum += user_expense_childcare_amount
       if user_expense_food:
